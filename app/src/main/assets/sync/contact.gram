@@ -1,0 +1,10 @@
+#JSGF V1.0;
+
+grammar contact;
+
+<name> = tony       |
+         kyusong    |
+         alan       |
+         maxine     ;
+
+public <contact> = <name>;

@@ -1,0 +1,9 @@
+#JSGF V1.0;
+
+grammar contact2;
+
+<name> = mom       |
+         steve     |
+         tony      ;
+
+public <contact2> = <name>;
