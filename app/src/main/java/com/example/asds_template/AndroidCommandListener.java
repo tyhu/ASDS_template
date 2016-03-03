@@ -1,4 +1,4 @@
-package com.example.tingyao.emailapp;
+package com.example.asds_template;
 
 import android.content.Context;
 import android.os.Handler;
