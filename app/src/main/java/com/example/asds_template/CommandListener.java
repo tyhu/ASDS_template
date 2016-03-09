@@ -19,7 +19,8 @@ import java.io.IOException;
  * Created by harry on 1/12/16.
  */
 public class CommandListener implements RecognitionListener  {
-    private MyRecognizer recognizer;
+    //private MyRecognizer recognizer;
+    private MultipleRecognizer recognizer;
     Context context;
     private static final String CMD_START = "cmd_start";
     private static final String CMD_FINAL = "cmd_final";
@@ -28,9 +29,14 @@ public class CommandListener implements RecognitionListener  {
     private static final String CMD_CONTI = "cmd_continue";
     private static final String CMD_REPLY_ONLY = "cmd_reply_only";
     private static final String START_KEY = "in mind agent";
+    //private static final String START_KEY = "hello skylark";
     private static final String REPLY_EMAIL = "reply email";
     private static final String TERMINATE_WORD = "terminate";
     private Handler commandHandler;
+
+    //for bing recognizer
+    private String client_id = "dmeexdia";
+    private String client_secret = "wNUXY7NvpIw1ugB4zVcUPhVQS6Lv9MFNPWa6qWIkIFY=";
 
     public CommandListener(Context con, Handler commandHandler){
         context = con;
@@ -80,13 +86,13 @@ public class CommandListener implements RecognitionListener  {
                 .setRawLogDir(assetsDir)
 
                         // Threshold to tune for keyphrase to balance between false alarms and misses
-                .setKeywordThreshold(1e-20f)
+                .setKeywordThreshold(1e-30f)
                         //.setKeywordThreshold(1e-15f)
 
                         // Use context-independent phonetic search, context-dependent is too slow for mobile
                 .setBoolean("-allphone_ci", true)
-
-                .getRecognizer();
+                .getMultipleRecognizer(client_id,client_secret);
+                //.getRecognizer();
         recognizer.addListener(this);
 
         //recognizer.addKeyphraseSearch("cmd1", "reply email");
@@ -138,7 +144,6 @@ public class CommandListener implements RecognitionListener  {
         else
             recognizer.startListening(type, search_duration);
     }
-
 
 
     public void SuperSearch(String type, int search_duration){
@@ -226,6 +231,12 @@ public class CommandListener implements RecognitionListener  {
             if (cmd.equals("continue")||cmd.equals("yes")){
                 Message msg = new Message();
                 msg.arg1 = 8;
+                commandHandler.sendMessage(msg);
+            }
+            if (cmd.contains("[bing]")){
+                Message msg = new Message();
+                msg.arg1 = 10;
+                msg.obj = cmd;
                 commandHandler.sendMessage(msg);
             }
         }

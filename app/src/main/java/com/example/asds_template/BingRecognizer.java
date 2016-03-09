@@ -39,9 +39,9 @@ public class BingRecognizer {
     private final int sampleRate=16000;
     private int bufferSize;
 
-    static{
-        System.loadLibrary("opensmileTest");
-    }
+    //static{
+    //   System.loadLibrary("opensmileTest");
+    //}
 
     public BingRecognizer(String client_id,String client_secret){
         this.client_id = client_id;
@@ -124,6 +124,7 @@ public class BingRecognizer {
         outputStream.flush();
         outputStream.close();
         System.out.println("after close");
+        recorder.release();
 
         String jsonstr="";
         String output = "[Noise]";

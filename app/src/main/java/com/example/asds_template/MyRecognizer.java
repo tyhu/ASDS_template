@@ -47,9 +47,9 @@ public class MyRecognizer {
     private float bias;
     boolean distraction = false;
 
-    static{
-        System.loadLibrary("opensmileTest");
-    }
+    //static{
+    //    System.loadLibrary("opensmileTest");
+    //}
     public native float[] opensmilefunc(Object[] m);
     private boolean detectStatus;
     private boolean filler_flag;

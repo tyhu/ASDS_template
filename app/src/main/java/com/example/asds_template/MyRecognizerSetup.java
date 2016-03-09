@@ -27,6 +27,10 @@ public class MyRecognizerSetup {
         return new MyRecognizer(this.config);
     }
 
+    public MultipleRecognizer getMultipleRecognizer(String client_id,String client_secret) throws IOException {
+        return new MultipleRecognizer(this.config,client_id,client_secret);
+    }
+
     public MyRecognizerSetup setAcousticModel(File model) {
         return this.setString("-hmm", model.getPath());
     }
