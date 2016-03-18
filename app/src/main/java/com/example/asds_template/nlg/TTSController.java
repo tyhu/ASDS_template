@@ -1,4 +1,4 @@
-package com.example.asds_template;
+package com.example.asds_template.nlg;
 
 import java.util.HashMap;
 import java.util.Locale;

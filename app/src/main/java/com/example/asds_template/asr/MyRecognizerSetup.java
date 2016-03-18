@@ -1,4 +1,4 @@
-package com.example.asds_template;
+package com.example.asds_template.asr;
 
 import edu.cmu.pocketsphinx.Config;
 import edu.cmu.pocketsphinx.Decoder;

@@ -1,16 +1,10 @@
-package com.example.asds_template;
+package com.example.asds_template.nlg;
 
 /**
  * Created by TingYao on 3/3/2016.
  */
 
 import android.content.Context;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 public class NLG {
     TTSController tts;

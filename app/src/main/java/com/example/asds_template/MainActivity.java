@@ -1,18 +1,24 @@
 package com.example.asds_template;
 
+import android.accounts.AccountManager;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.io.IOException;
+import com.example.asds_template.asr.CommandListener;
+import com.example.asds_template.nlg.NLG;
 
+import java.util.ArrayList;
+import java.util.List;
+import com.example.asds_template.config.Constants;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     Button voiceCMD;
     Button asrButton;
 
+    GmailManager gm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         voiceCMD = (Button) findViewById(R.id.voiceCmd);
         stopButton = (Button) findViewById(R.id.stop_button);
         asrButton = (Button) findViewById(R.id.bingASRButton);
+        //gmailButton = (Button) findViewById(R.id.gmail_button);
         textView = (TextView) findViewById(R.id.textView);
 
         //allow main thread execute network operation
@@ -85,11 +94,64 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 commandListener.StopSearch();
                 //try{
-                    //String asrOutput = bingRecognizer.BingSuperRecognition();
-                    //textView.setText("output from bingASR: \n"+asrOutput);
+                //String asrOutput = bingRecognizer.BingSuperRecognition();
+                //textView.setText("output from bingASR: \n"+asrOutput);
                 //}catch(IOException e){
                 //    Log.e("ASDS", e.getMessage());}
             }
         });
+
+        SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
+        gm = new GmailManager(this.context,settings,this);
     }
+
+    public void startGMail(View view){
+        //Intent intent = new Intent(this, GmailActivity.class);
+        //startActivity(intent);
+        List<String> labels = new ArrayList<String>();
+        //gm.updateLabelLstFromGmail();
+        gm.updateUnReadLstFromGmail();
+        System.out.println(labels);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case Constants.REQUEST_GOOGLE_PLAY_SERVICES:
+                if (resultCode != RESULT_OK) {
+                    gm.isGooglePlayServicesAvailable();
+                }
+                break;
+            case Constants.REQUEST_ACCOUNT_PICKER:
+                if (resultCode == RESULT_OK && data != null &&
+                        data.getExtras() != null) {
+                    String accountName =
+                            data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                    if (accountName != null) {
+                        System.out.println("catch the name");
+                        gm.setSelectedAccountName(accountName);
+                        /*
+                        mCredential.setSelectedAccountName(accountName);
+                        SharedPreferences settings =
+                                getPreferences(Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putString(PREF_ACCOUNT_NAME, accountName);
+                        editor.apply();*/
+
+                    }
+                } else if (resultCode == RESULT_CANCELED) {
+                    System.out.println("Account unspecified.");
+                }
+                break;
+            case Constants.REQUEST_AUTHORIZATION:
+                if (resultCode != RESULT_OK) {
+                    gm.chooseAccount();
+                }
+                break;
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
 }

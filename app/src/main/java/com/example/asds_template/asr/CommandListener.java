@@ -1,4 +1,4 @@
-package com.example.asds_template;
+package com.example.asds_template.asr;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -7,10 +7,8 @@ import android.os.Message;
 import android.util.Log;
 
 import edu.cmu.pocketsphinx.Assets;
-import edu.cmu.pocketsphinx.Config;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
-import edu.cmu.pocketsphinx.SpeechRecognizer;
 
 import java.io.File;
 import java.io.IOException;

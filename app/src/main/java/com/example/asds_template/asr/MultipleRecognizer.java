@@ -1,4 +1,4 @@
-package com.example.asds_template;
+package com.example.asds_template.asr;
 
 import android.media.AudioRecord;
 import android.net.Uri;
@@ -14,7 +14,6 @@ import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -25,7 +24,6 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;

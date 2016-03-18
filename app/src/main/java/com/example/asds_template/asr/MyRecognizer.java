@@ -1,13 +1,12 @@
-package com.example.asds_template;
+package com.example.asds_template.asr;
 
 import android.media.AudioRecord;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+
 import edu.cmu.pocketsphinx.Config;
 import edu.cmu.pocketsphinx.Decoder;
-import edu.cmu.pocketsphinx.Feature;
-import edu.cmu.pocketsphinx.FrontEnd;
 import edu.cmu.pocketsphinx.FsgModel;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
@@ -19,8 +18,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import javax.xml.transform.Result;
 
 /**
  * Created by harry on 11/5/15.
