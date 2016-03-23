@@ -12,4 +12,17 @@ public class NLG {
         tts = new TTSController(context);
     }
     public void speakRaw(String msg){ tts.speakThis(msg); }
+
+    public void InformUnread(int num){
+        if(num==-1)
+            tts.speakThis("Connection Error, please check your internet");
+        else if(num==0)
+            tts.speakThis("You have no unread email");
+        else if(num<6){
+            String numStr = String.valueOf(num);
+            tts.speakThis("You have "+numStr+", unread email");
+        }
+        else
+            tts.speakThis("You have more than 5 unread email");
+    }
 }

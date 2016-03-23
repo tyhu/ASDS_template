@@ -81,7 +81,8 @@ public class MultipleRecognizer {
             Log.e("bingVoice", e.toString());
         }
         wav_header = new byte[44];
-        File sampleWav=new File("/sdcard/history.raw.wav");
+        //File sampleWav=new File("/sdcard/history.raw.wav");
+        File sampleWav=new File("/sdcard/tmp.wav");
         try(FileInputStream in = new FileInputStream(sampleWav)){
             in.read(wav_header);
         }catch(Exception ex){
@@ -421,6 +422,17 @@ public class MultipleRecognizer {
                 outputStream.write(wav_header);
                 byte[] bytesbuf;
 
+                //***********end turn detection preparation
+                float energy;
+                float maxEnergy = 0;
+                float minEnergy = (float)1E12;
+                int postCount = 0;
+                int postThres = 4;
+                int preCount = 0;
+                int preThres = 10;
+                boolean endTurn = false;
+                boolean noTurn = false;
+
                 recorder.startRecording();
                 if(recorder.getRecordingState() == 1) {
                     recorder.stop();
@@ -435,7 +447,7 @@ public class MultipleRecognizer {
                     bytesbuf = short2byte(buffer,bufferSize);
                     outputStream.write(bytesbuf);
                     System.out.println("time out: "+timeoutSamples);
-                    while(!interrupted() && (this.timeoutSamples == -1 || this.remainingSamples > 0)) {
+                    while(!interrupted() && (this.timeoutSamples == -1 || this.remainingSamples > 0) && !noTurn && !endTurn) {
                         int nread = recorder.read(buffer, 0, buffer.length);
                         decoder.processRaw(buffer, (long)nread, false, false);
                         bytesbuf = short2byte(buffer,bufferSize);
@@ -460,6 +472,22 @@ public class MultipleRecognizer {
                             Hypothesis hypothesis = decoder.hyp();
                             mainHandler.post(new ResultEvent(hypothesis, false));
                         }
+
+                        //**********end turn detection
+                        energy = bufferEnergy(buffer);
+                        if(energy>maxEnergy) maxEnergy = energy;
+                        if(energy<minEnergy) minEnergy = energy;
+
+                        if(energy<maxEnergy*0.01) postCount+=1;
+                        else postCount=0;
+                        if(maxEnergy<minEnergy*10) preCount+=1;
+
+                        if(postCount>postThres) endTurn = true;
+                        if(preCount>preThres) noTurn = true;
+
+                        System.out.println("energy: "+energy);
+                        System.out.println("postCount: "+postCount);
+                        //*****end of end turn detection
 
                         if(this.timeoutSamples != -1) {
                             this.remainingSamples -= nread;
@@ -495,7 +523,7 @@ public class MultipleRecognizer {
                         }
                         System.out.println(jsonstr);
                         JSONObject jobj = new JSONObject(jsonstr);
-                        if (jobj.getJSONObject("header").has("lexical")){
+                        if (jobj.getJSONObject("header").has("lexical") && endTurn){
                             output = (String) jobj.getJSONObject("header").get("lexical");
                             System.out.println(output);
                             Hypothesis hypothesis = new Hypothesis("[bing] "+output,1,1);

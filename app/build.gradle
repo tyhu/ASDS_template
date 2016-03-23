@@ -32,5 +32,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-identity:7.8.0'
 
 }
-
+ant.importBuild 'assets.xml'
+preBuild.dependsOn(list, checksum)
+clean.dependsOn(clean_assets)
 

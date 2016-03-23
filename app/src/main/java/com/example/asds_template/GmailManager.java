@@ -53,6 +53,7 @@ public class GmailManager {
     //****** Gmail content
     List<String> labels;
     List<Message> messages;
+    List<String> snippets;
 
     public GmailManager(Context context, SharedPreferences settings, Activity rootActivity){
         this.settings = settings;
@@ -64,6 +65,8 @@ public class GmailManager {
                 .setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
 
     }
+
+    public int unreadNum(){ return messages.size(); }
 
     public boolean isGooglePlayServicesAvailable() {
         final int connectionStatusCode =
@@ -103,6 +106,10 @@ public class GmailManager {
         return mService;
     }
 
+    public int getUnReadNum(){
+        return messages.size();
+    }
+
     public void updateUnReadLstFromGmail(){
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -115,6 +122,7 @@ public class GmailManager {
                 ArrayList<String> tmpLabs = new ArrayList<String>();
                 //if(messages == null)
                 messages = new ArrayList<Message>();
+                snippets = new ArrayList<String>();
                 tmpLabs.add("UNREAD");
                 try {
                     ListMessagesResponse listResponse = mService.users().messages().list(user)
@@ -124,7 +132,7 @@ public class GmailManager {
                         messages.add(msg);
                         //System.out.println(msg.getId());
                         Message message = mService.users().messages().get(user, msg.getId()).setFormat("raw").execute();
-                        System.out.println(message.getSnippet());
+                        snippets.add(message.getSnippet());
                     }
                 } catch (Exception e){
                     System.out.println(e.toString());

@@ -2,4 +2,6 @@
 
 grammar cmd1;
 
-public <cmd1> = (check in box) | (reply email) | (read the email from) | (summarize them) | (play history) | (read the email about scheduling) | (read next email);
+<cmd> = (check in box) | (next email);
+
+public <cmd1> = <cmd>+;

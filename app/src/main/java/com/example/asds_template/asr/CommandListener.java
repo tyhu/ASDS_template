@@ -35,6 +35,7 @@ public class CommandListener implements RecognitionListener  {
     //for bing recognizer
     private String client_id = "dmeexdia";
     private String client_secret = "wNUXY7NvpIw1ugB4zVcUPhVQS6Lv9MFNPWa6qWIkIFY=";
+    private boolean useBing;
 
     public CommandListener(Context con, Handler commandHandler){
         context = con;
@@ -84,8 +85,8 @@ public class CommandListener implements RecognitionListener  {
                 .setRawLogDir(assetsDir)
 
                         // Threshold to tune for keyphrase to balance between false alarms and misses
+                //.setKeywordThreshold(1e-30f)
                 .setKeywordThreshold(1e-30f)
-                        //.setKeywordThreshold(1e-15f)
 
                         // Use context-independent phonetic search, context-dependent is too slow for mobile
                 .setBoolean("-allphone_ci", true)
@@ -146,6 +147,7 @@ public class CommandListener implements RecognitionListener  {
 
     public void SuperSearch(String type, int search_duration){
         recognizer.stop();
+        useBing = true;
         recognizer.startSuperListening(type, search_duration);
     }
 
@@ -183,7 +185,7 @@ public class CommandListener implements RecognitionListener  {
                 msg.arg1 = 0;
                 commandHandler.sendMessage(msg);
             }
-            if (cmd.equals("reply email") || cmd.equals("check in box") || cmd.equals("read the email from") || cmd.equals("summarize them")){
+            else if (cmd.endsWith("next email")){
                 Message msg = new Message();
                 msg.arg1 = 1;
                 msg.obj = cmd;
@@ -191,51 +193,12 @@ public class CommandListener implements RecognitionListener  {
                 commandHandler.sendMessage(msg);
                 recognizer.stop();
             }
-            if (cmd.equals("play history")){
-                Message msg = new Message();
-                msg.arg1 = 5;
-                msg.obj = cmd;
-                recognizer.stop();
-                commandHandler.sendMessage(msg);
-            }
-            if (cmd.equals("distracted!")){
-                Message msg = new Message();
-                msg.arg1 = 6;
-                commandHandler.sendMessage(msg);
-                recognizer.stop();
-                commandHandler.sendMessage(msg);
-            }
-            if (cmd.equals(TERMINATE_WORD)){
-                Message msg = new Message();
-                msg.arg1 = 3;
-                commandHandler.sendMessage(msg);
-            }
-            if (recognizer.getSearchName().equals(CMD_CONTACT)){
-                Message msg = new Message();
-                msg.arg1 = 4;
-                msg.obj = cmd;
-                commandHandler.sendMessage(msg);
-            }
-            if (cmd.equals("read the email about scheduling")){
-                Message msg = new Message();
-                msg.arg1 = 7;
-                commandHandler.sendMessage(msg);
-            }
-            if (cmd.equals("read next email")){
-                Message msg = new Message();
-                msg.arg1 = 9;
-                commandHandler.sendMessage(msg);
-            }
-            if (cmd.equals("continue")||cmd.equals("yes")){
-                Message msg = new Message();
-                msg.arg1 = 8;
-                commandHandler.sendMessage(msg);
-            }
-            if (cmd.contains("[bing]")){
+            else if (cmd.contains("[bing]")){
                 Message msg = new Message();
                 msg.arg1 = 10;
                 msg.obj = cmd;
-                commandHandler.sendMessage(msg);
+                if (useBing)
+                    commandHandler.sendMessage(msg);
             }
         }
 

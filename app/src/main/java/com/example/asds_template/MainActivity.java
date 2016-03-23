@@ -14,15 +14,16 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.asds_template.asr.CommandListener;
+import com.example.asds_template.dm.DialogOne;
 import com.example.asds_template.nlg.NLG;
 
 import java.util.ArrayList;
 import java.util.List;
 import com.example.asds_template.config.Constants;
+import com.example.asds_template.nlu.NLU;
 
 public class MainActivity extends AppCompatActivity {
 
-    public NLG nlg;
     public CommandListener commandListener;
     //public BingRecognizer bingRecognizer;
     public Handler commandHandler;
@@ -34,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
     Button asrButton;
 
     GmailManager gm;
+    NLU nlu;
+    NLG nlg;
+    DialogOne dm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,13 +62,30 @@ public class MainActivity extends AppCompatActivity {
                     //start keyword
                     //commandListener.Search("cmd1",7000);
                     nlg.speakRaw("Yes");
+                    commandListener.SuperSearch("cmd1", 4000);
+                    textView.setText("Listening...");
+
+                }
+                else if (msg.arg1==1){
+                    //================== pipeline =====================
+                    //String asrOutput = (String)msg.obj;
+                    NLU.NLUState nluState = nlu.understanding((String)msg.obj);
+                    dm.inputNLUState(nluState);
+
                     commandListener.StopSearch();
+                    //nlg.speakRaw("you have no unread email");
+                    //DM
+                    //nlg
                 }
                 else if (msg.arg1==10){
-
                     //commandListener.Search("cmd1",7000);
-                    textView.setText((String)msg.obj);
+                    textView.setText((String) msg.obj);
+                    NLU.NLUState nluState = nlu.understanding((String)msg.obj);
+                    dm.inputNLUState(nluState);
                     commandListener.StopSearch();
+                    commandListener.Search("cmd_start", -1);
+                    //nlg.speakRaw("you have no unread email");
+
                 }
                 return false;
             }
@@ -72,14 +93,26 @@ public class MainActivity extends AppCompatActivity {
         context = getApplicationContext();
         //bingRecognizer = new BingRecognizer("dmeexdia","wNUXY7NvpIw1ugB4zVcUPhVQS6Lv9MFNPWa6qWIkIFY=");
         commandListener = new CommandListener(context, commandHandler);
+        SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
+        gm = new GmailManager(this.context,settings,this);
+        List<String> dialogIntent = new ArrayList<String>();
+        dialogIntent.add("read");
+        dialogIntent.add("summarize");
+        dialogIntent.add("check");
+        dialogIntent.add("repeat");
+        dialogIntent.add("spell");
+        nlu = new NLU(dialogIntent);
         nlg = new NLG(context);
+        dm = new DialogOne(gm,nlg,dialogIntent);
 
 
         voiceCMD.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Perform action on click
                 //commandListener.Search("cmd_start",-1);
-                commandListener.SuperSearch("cmd_start", 4000);
+                commandListener.Search("cmd_start", 4000);
+                //commandListener.SuperSearch("cmd1", 4000);
+                textView.setText("Listening...");
                 //commandListener.Search("cmd_start", -1);
             }
         });
@@ -92,7 +125,9 @@ public class MainActivity extends AppCompatActivity {
 
         asrButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                commandListener.StopSearch();
+                commandListener.Search("cmd_start", -1);
+                textView.setText("Listening...");
+                //commandListener.StopSearch();
                 //try{
                 //String asrOutput = bingRecognizer.BingSuperRecognition();
                 //textView.setText("output from bingASR: \n"+asrOutput);
@@ -100,9 +135,7 @@ public class MainActivity extends AppCompatActivity {
                 //    Log.e("ASDS", e.getMessage());}
             }
         });
-
-        SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
-        gm = new GmailManager(this.context,settings,this);
+        gm.updateUnReadLstFromGmail();
     }
 
     public void startGMail(View view){
