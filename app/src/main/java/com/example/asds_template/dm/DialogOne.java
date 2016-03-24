@@ -5,6 +5,7 @@ import com.example.asds_template.nlg.NLG;
 import com.example.asds_template.nlu.NLU;
 import com.google.api.services.gmail.model.Message;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -30,8 +31,21 @@ public class DialogOne {
         state.setCurrentIntent(dialogIntent.get(intentIdx));
         //update state
         //take action
-        if(state.getCurrentIntent().equals("check"));
+        if(state.getCurrentIntent().equals("check")) {
             nlg.InformUnread(gm.getUnReadNum());
+            state.setLastAction("check");
+        }
+        else if(state.getCurrentIntent().equals("read")){
+            state.setFocusMsg(gm.getMsg(nluState.getOrder()));
+            Message msg = state.getFocusMsg();
+            gm.markAsRead(msg.getId());
+            //System.out.println("snippet: "+msg.getSnippet());
+            nlg.speakRaw(msg.getSnippet());
+            state.setLastAction("read");
+        }
+        else if(state.getCurrentIntent().equals("repeat")){
+
+        }
     }
 
     //===action set: read, check, summarize, repeat, spell

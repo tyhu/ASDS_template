@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
                     dm.inputNLUState(nluState);
 
                     commandListener.StopSearch();
+                    commandListener.Search("cmd_start", -1);
                     //nlg.speakRaw("you have no unread email");
                     //DM
                     //nlg

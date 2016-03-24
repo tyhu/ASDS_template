@@ -1,6 +1,7 @@
 package com.example.asds_template.nlu;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -13,8 +14,13 @@ public class NLU {
     }
     public NLUState understanding(String asrInput){
         NLUState nluState = new NLUState();
-        String [] tokens = asrInput.split(" ");
+        List<String> tokens = Arrays.asList(asrInput.split(" "));
         nluState.intentIdx = 2;
+        System.out.println(tokens);
+        if(tokens.contains("email")){
+            nluState.intentIdx = 0;
+            nluState.order = 0;
+        }
         return nluState;
     }
 
@@ -34,5 +40,6 @@ public class NLU {
         public int getIntent(){ return intentIdx; }
         public String getTag(){ return tag; }
         public String getQuery(){ return query; }
+        public int getOrder() { return order; }
     }
 }

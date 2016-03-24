@@ -34,6 +34,7 @@ import java.util.List;
 import com.example.asds_template.config.Constants;
 import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
+import com.google.api.services.gmail.model.ModifyMessageRequest;
 
 /**
  * Created by TingYao on 3/17/2016.
@@ -45,7 +46,7 @@ public class GmailManager {
     //static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     private static final String PREF_ACCOUNT_NAME = "inminddistraction";
     //private static final String[] SCOPES = { GmailScopes.GMAIL_LABELS };
-    private static final String[] SCOPES = { GmailScopes.GMAIL_READONLY };
+    private static final String[] SCOPES = { GmailScopes.GMAIL_MODIFY };
     private SharedPreferences settings;
     Context context;
     Activity rootActivity;
@@ -53,7 +54,7 @@ public class GmailManager {
     //****** Gmail content
     List<String> labels;
     List<Message> messages;
-    List<String> snippets;
+    //List<String> snippets;
 
     public GmailManager(Context context, SharedPreferences settings, Activity rootActivity){
         this.settings = settings;
@@ -63,10 +64,15 @@ public class GmailManager {
                 context, Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff())
                 .setSelectedAccountName(settings.getString(PREF_ACCOUNT_NAME, null));
-
+        messages = new ArrayList<Message>();
     }
 
     public int unreadNum(){ return messages.size(); }
+
+    public void markAsRead(String msgId){
+        MarkRequestTask setUnreadTask = new MarkRequestTask(msgId);
+        setUnreadTask.execute();
+    }
 
     public boolean isGooglePlayServicesAvailable() {
         final int connectionStatusCode =
@@ -110,6 +116,10 @@ public class GmailManager {
         return messages.size();
     }
 
+    public Message getMsg(int order){
+        return messages.get(order);
+    }
+
     public void updateUnReadLstFromGmail(){
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -121,18 +131,17 @@ public class GmailManager {
                 String user = "me";
                 ArrayList<String> tmpLabs = new ArrayList<String>();
                 //if(messages == null)
-                messages = new ArrayList<Message>();
-                snippets = new ArrayList<String>();
+
                 tmpLabs.add("UNREAD");
                 try {
                     ListMessagesResponse listResponse = mService.users().messages().list(user)
                             .setLabelIds(tmpLabs).execute();
-                    System.out.println(listResponse.size());
+                    //System.out.println(listResponse.size());
+                    messages.clear();
                     for (Message msg : listResponse.getMessages()) {
-                        messages.add(msg);
                         //System.out.println(msg.getId());
                         Message message = mService.users().messages().get(user, msg.getId()).setFormat("raw").execute();
-                        snippets.add(message.getSnippet());
+                        messages.add(message);
                     }
                 } catch (Exception e){
                     System.out.println(e.toString());
@@ -202,5 +211,26 @@ public class GmailManager {
         }
     }
 
+    private class MarkRequestTask extends AsyncTask<Void, Void, Void> {
+        private String msgId;
 
+        public MarkRequestTask(String msgId) {
+            this.msgId = msgId;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            Gmail service = getGmailService();
+            List<String> labelsToRemove = new ArrayList<String>();
+            labelsToRemove.add("UNREAD");
+            ModifyMessageRequest mods = new ModifyMessageRequest().setRemoveLabelIds(labelsToRemove);
+            try{
+                service.users().messages().modify("me", msgId, mods).execute();
+            } catch (IOException e) {
+                System.out.println(e.toString());
+            }
+            updateUnReadLstFromGmail();
+            return null;
+        }
+    }
 }
