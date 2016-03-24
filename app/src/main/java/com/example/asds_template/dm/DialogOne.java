@@ -44,6 +44,13 @@ public class DialogOne {
             state.setLastAction("read");
         }
         else if(state.getCurrentIntent().equals("repeat")){
+            if(state.getLastAction().equals("read")){
+                Message msg = state.getFocusMsg();
+                nlg.speakRaw(msg.getSnippet());
+            }
+            else if(state.getLastAction().equals("check")){
+                nlg.InformUnread(gm.getUnReadNum());
+            }
 
         }
     }

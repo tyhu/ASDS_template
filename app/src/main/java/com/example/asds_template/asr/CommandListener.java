@@ -6,6 +6,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import com.example.asds_template.config.Constants;
+
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
 import edu.cmu.pocketsphinx.RecognitionListener;
@@ -182,12 +184,13 @@ public class CommandListener implements RecognitionListener  {
             System.out.println(cmd);
             if (cmd.equals(START_KEY)){
                 Message msg = new Message();
-                msg.arg1 = 0;
+                msg.arg1 = Constants.KEYWD_DETECTED;
+                recognizer.stop();
                 commandHandler.sendMessage(msg);
             }
             else if (cmd.endsWith("next email")){
                 Message msg = new Message();
-                msg.arg1 = 1;
+                msg.arg1 = Constants.ASR_OUTPUT;
                 msg.obj = cmd;
 
                 commandHandler.sendMessage(msg);
@@ -195,7 +198,7 @@ public class CommandListener implements RecognitionListener  {
             }
             else if (cmd.contains("[bing]")){
                 Message msg = new Message();
-                msg.arg1 = 10;
+                msg.arg1 = Constants.ASR_OUTPUT;
                 msg.obj = cmd;
                 if (useBing)
                     commandHandler.sendMessage(msg);

@@ -58,15 +58,15 @@ public class MainActivity extends AppCompatActivity {
         commandHandler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
-                if (msg.arg1==0){
+                if (msg.arg1==Constants.KEYWD_DETECTED){
                     //start keyword
                     //commandListener.Search("cmd1",7000);
                     nlg.speakRaw("Yes");
-                    commandListener.SuperSearch("cmd1", 4000);
+                    //commandListener.SuperSearch("cmd1", 4000);
                     textView.setText("Listening...");
 
                 }
-                else if (msg.arg1==1){
+                else if (msg.arg1==-1){
                     //================== pipeline =====================
                     //String asrOutput = (String)msg.obj;
                     NLU.NLUState nluState = nlu.understanding((String)msg.obj);
@@ -78,14 +78,28 @@ public class MainActivity extends AppCompatActivity {
                     //DM
                     //nlg
                 }
-                else if (msg.arg1==10){
+                else if (msg.arg1==Constants.ASR_OUTPUT){
                     //commandListener.Search("cmd1",7000);
                     textView.setText((String) msg.obj);
                     NLU.NLUState nluState = nlu.understanding((String)msg.obj);
                     dm.inputNLUState(nluState);
-                    commandListener.StopSearch();
-                    commandListener.Search("cmd_start", -1);
+
+                    //commandListener.StopSearch();
+                    //commandListener.Search("cmd_start", -1);
                     //nlg.speakRaw("you have no unread email");
+
+                }
+                else if (msg.arg1==Constants.TTS_COMPLETE){
+                    commandListener.SuperSearch("cmd1", 7000);
+                    /*
+                    System.out.println("tts: "+(String)msg.obj);
+                    if(((String)msg.obj).equals("Yes"))
+                        commandListener.SuperSearch("cmd1", 7000);
+                    else{
+                        commandListener.StopSearch();
+                        commandListener.Search("cmd_start", -1);
+                    }
+                    */
 
                 }
                 return false;
@@ -103,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
         dialogIntent.add("repeat");
         dialogIntent.add("spell");
         nlu = new NLU(dialogIntent);
-        nlg = new NLG(context);
+        nlg = new NLG(context,commandHandler);
         dm = new DialogOne(gm,nlg,dialogIntent);
 
 

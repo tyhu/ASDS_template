@@ -11,6 +11,8 @@ import android.speech.tts.UtteranceProgressListener;
 import android.util.Log;
 import android.media.AudioManager;
 
+import com.example.asds_template.config.Constants;
+
 /**
  * Created by tingyao on 4/17/15.
  */
@@ -20,16 +22,16 @@ public class TTSController {
 
     TextToSpeech ttobj;
     Context appContect;
-    //Handler mCallWhenDone;
+    Handler mCallWhenDone;
     Integer lastMessageQueued = 0;
 
     //control volume
     int amStreamMusicMaxVol;
     AudioManager am;
 
-    public TTSController(Context appContext)
+    public TTSController(Context appContext, Handler callWhenDone)
     {
-        //mCallWhenDone = callWhenDone;
+        mCallWhenDone = callWhenDone;
         this.appContect = appContext;
 
         TextToSpeech.OnInitListener listener = new TextToSpeech.OnInitListener()
@@ -53,8 +55,9 @@ public class TTSController {
                             if (utteranceId.equals(lastMessageQueued.toString()))
                             {
                                 Message msg = new Message();
-                                msg.arg1 = 1;
-                                //mCallWhenDone.sendMessage(msg);
+                                msg.arg1 = Constants.TTS_COMPLETE;
+                                msg.obj = lastMessageQueued.toString();
+                                mCallWhenDone.sendMessage(msg);
                             }
                         }
 

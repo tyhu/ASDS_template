@@ -5,11 +5,13 @@ package com.example.asds_template.nlg;
  */
 
 import android.content.Context;
+import android.os.Handler;
+import android.speech.tts.UtteranceProgressListener;
 
-public class NLG {
+public class NLG{
     TTSController tts;
-    public NLG(Context context){
-        tts = new TTSController(context);
+    public NLG(Context context, Handler handler){
+        tts = new TTSController(context, handler);
     }
     public void speakRaw(String msg){ tts.speakThis(msg); }
 
@@ -25,4 +27,5 @@ public class NLG {
         else
             tts.speakThis("You have more than 5 unread email");
     }
+
 }
