@@ -21,6 +21,9 @@ public class NLU {
             nluState.intentIdx = 0;
             nluState.order = 0;
         }
+        else if(tokens.contains("repeat")){
+            nluState.intentIdx = 3;
+        }
         return nluState;
     }
 

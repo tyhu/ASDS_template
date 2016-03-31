@@ -2,6 +2,6 @@
 
 grammar cmd1;
 
-<cmd> = (check in box) | (next email);
+<cmd> = (check in box) | (next email) | (repeat that) | terminate;
 
 public <cmd1> = <cmd>+;

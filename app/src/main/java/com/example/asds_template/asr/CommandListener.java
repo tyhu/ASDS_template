@@ -84,7 +84,7 @@ public class CommandListener implements RecognitionListener  {
                 .setDictionary(new File(assetsDir, "cmudict-en-us.dict"))
 
                         // To disable logging of raw audio comment out this call (takes a lot of space on the device)
-                .setRawLogDir(assetsDir)
+                //.setRawLogDir(assetsDir)
 
                         // Threshold to tune for keyphrase to balance between false alarms and misses
                 //.setKeywordThreshold(1e-30f)
@@ -101,9 +101,11 @@ public class CommandListener implements RecognitionListener  {
         recognizer.addKeyphraseSearch(CMD_REPLY_ONLY, REPLY_EMAIL);
         recognizer.addKeyphraseSearch(CMD_FINAL, TERMINATE_WORD);
         File cmd1Grammar = new File(assetsDir, "cmd1.gram");
+        File cmd2Grammar = new File(assetsDir, "cmd2.gram");
         File contactGrammar = new File(assetsDir, "contact2.gram");
         File continueGrammar = new File(assetsDir, "continue.gram");
         recognizer.addGrammarSearch(CMD_TYPE1, cmd1Grammar);
+        recognizer.addGrammarSearch("cmd2", cmd2Grammar);
         recognizer.addGrammarSearch(CMD_CONTACT, contactGrammar);
         recognizer.addGrammarSearch(CMD_CONTI, continueGrammar);
         //TODO
@@ -194,7 +196,14 @@ public class CommandListener implements RecognitionListener  {
                 msg.obj = cmd;
 
                 commandHandler.sendMessage(msg);
+                useBing = false;
                 recognizer.stop();
+            }
+            else if (cmd.endsWith("terminate")){
+                System.out.println("we have time out");
+                Message msg = new Message();
+                msg.arg1 = Constants.ASR_TIME_OUT;
+                commandHandler.sendMessage(msg);
             }
             else if (cmd.contains("[bing]")){
                 Message msg = new Message();
@@ -203,6 +212,8 @@ public class CommandListener implements RecognitionListener  {
                 if (useBing)
                     commandHandler.sendMessage(msg);
             }
+            //else if (cmd.contains())
+
         }
 
         //System.out.println("partial result!");
@@ -213,7 +224,7 @@ public class CommandListener implements RecognitionListener  {
         //notify that no result to show
         System.out.println("we have time out");
         Message msg = new Message();
-        msg.arg1 = 2;
+        msg.arg1 = Constants.ASR_TIME_OUT;
         commandHandler.sendMessage(msg);
     }
 

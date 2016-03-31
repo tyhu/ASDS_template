@@ -1,0 +1,7 @@
+#JSGF V1.0;
+
+grammar cmd2;
+
+<cmd> = (check in box) | (read next email) | repeat;
+
+public <cmd2> = <cmd>;

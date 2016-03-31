@@ -493,7 +493,7 @@ public class MultipleRecognizer {
                             this.remainingSamples -= nread;
                         }
                     }
-                    MFCCQueue.clear();
+                    //MFCCQueue.clear();
                     recorder.stop();
                     decoder.endUtt();
                     mainHandler.removeCallbacksAndMessages((Object)null);
@@ -529,6 +529,11 @@ public class MultipleRecognizer {
                             Hypothesis hypothesis = new Hypothesis("[bing] "+output,1,1);
                             mainHandler.post(new ResultEvent(hypothesis, false));
                         }
+                        else{
+                            mainHandler.post(new TimeoutEvent());
+                        }
+
+
                     }catch (IOException e){
                         Log.e("Main","connection error");
                     }catch (JSONException je){ Log.e("Bing",je.getMessage());}

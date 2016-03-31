@@ -6,6 +6,7 @@ package com.example.asds_template.config;
 public class Constants {
     //==dialogue message for handler
     public static final int KEYWD_DETECTED = 0;
+    public static final int ASR_TIME_OUT = 1;
     public static final int ASR_OUTPUT = 2;
     public static final int TTS_COMPLETE = 3;
 

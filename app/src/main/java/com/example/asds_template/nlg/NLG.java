@@ -15,6 +15,11 @@ public class NLG{
     }
     public void speakRaw(String msg){ tts.speakThis(msg); }
 
+    public void InformEmail(String sender,String content){
+        String output = sender+" said, "+content;
+        tts.speakThis(output);
+    }
+
     public void InformUnread(int num){
         if(num==-1)
             tts.speakThis("Connection Error, please check your internet");

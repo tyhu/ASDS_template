@@ -36,6 +36,9 @@ import com.google.api.services.gmail.model.ListMessagesResponse;
 import com.google.api.services.gmail.model.Message;
 import com.google.api.services.gmail.model.ModifyMessageRequest;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 /**
  * Created by TingYao on 3/17/2016.
  */
@@ -54,6 +57,7 @@ public class GmailManager {
     //****** Gmail content
     List<String> labels;
     List<Message> messages;
+    String query = "";
     //List<String> snippets;
 
     public GmailManager(Context context, SharedPreferences settings, Activity rootActivity){
@@ -119,6 +123,58 @@ public class GmailManager {
     public Message getMsg(int order){
         return messages.get(order);
     }
+    public String getSender(int order){
+        String sender = "unknown ";
+        String jstr = getMsg(order).getPayload().getHeaders().toString();
+        try{
+            JSONArray obj = new JSONArray(jstr);
+            for(int i=0;i<obj.length();i++){
+                System.out.println(obj.getJSONObject(i).getString("name"));
+                if(obj.getJSONObject(i).getString("name").equals("From")) {
+                    sender = obj.getJSONObject(i).getString("value");
+                    sender = sender.split("<")[0];
+                }
+            }
+        } catch (JSONException e) {
+            System.out.println("json warning: "+e.toString());
+        }
+        return sender;
+    }
+
+    public void searchLstFromGmail(String q){
+        this.query = q;
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                if(mCredential.getSelectedAccountName() == null)
+                    chooseAccount();
+                com.google.api.services.gmail.Gmail mService = getGmailService();
+
+                String user = "me";
+                ArrayList<String> tmpLabs = new ArrayList<String>();
+                //if(messages == null)
+
+                tmpLabs.add("UNREAD");
+                try {
+                    ListMessagesResponse listResponse = mService.users().messages().list(user)
+                            .setLabelIds(tmpLabs).setQ(query).execute();
+                    //System.out.println(listResponse.size());
+                    messages.clear();
+                    for (Message msg : listResponse.getMessages()) {
+                        //System.out.println(msg.getId());
+                        //Message message = mService.users().messages().get(user, msg.getId()).setFormat("raw").execute();
+                        Message message = mService.users().messages().get(user, msg.getId()).execute();
+                        messages.add(message);
+                    }
+                } catch (Exception e){
+                    System.out.println(e.toString());
+                    requestException(e);
+                }
+
+                return null;
+            }
+        }.execute();
+    }
 
     public void updateUnReadLstFromGmail(){
         new AsyncTask<Void, Void, Void>() {
@@ -140,7 +196,8 @@ public class GmailManager {
                     messages.clear();
                     for (Message msg : listResponse.getMessages()) {
                         //System.out.println(msg.getId());
-                        Message message = mService.users().messages().get(user, msg.getId()).setFormat("raw").execute();
+                        //Message message = mService.users().messages().get(user, msg.getId()).setFormat("raw").execute();
+                        Message message = mService.users().messages().get(user, msg.getId()).execute();
                         messages.add(message);
                     }
                 } catch (Exception e){

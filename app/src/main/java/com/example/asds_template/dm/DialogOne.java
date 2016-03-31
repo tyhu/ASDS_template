@@ -36,14 +36,23 @@ public class DialogOne {
             state.setLastAction("check");
         }
         else if(state.getCurrentIntent().equals("read")){
-            state.setFocusMsg(gm.getMsg(nluState.getOrder()));
-            Message msg = state.getFocusMsg();
-            gm.markAsRead(msg.getId());
-            //System.out.println("snippet: "+msg.getSnippet());
-            nlg.speakRaw(msg.getSnippet());
-            state.setLastAction("read");
+            if(gm.unreadNum()==0){
+                nlg.InformUnread(gm.getUnReadNum());
+                state.setLastAction("check");
+            }
+            else{
+                state.setFocusMsg(gm.getMsg(nluState.getOrder()));
+                Message msg = state.getFocusMsg();
+                gm.markAsRead(msg.getId());
+                //System.out.println("snippet: "+msg.getSnippet());
+                String snippet = msg.getSnippet();
+                String sender = gm.getSender(nluState.getOrder());
+                nlg.InformEmail(sender,snippet);
+                state.setLastAction("read");
+            }
         }
         else if(state.getCurrentIntent().equals("repeat")){
+            System.out.println("last action: "+state.getLastAction());
             if(state.getLastAction().equals("read")){
                 Message msg = state.getFocusMsg();
                 nlg.speakRaw(msg.getSnippet());

@@ -22,6 +22,10 @@ import java.util.List;
 import com.example.asds_template.config.Constants;
 import com.example.asds_template.nlu.NLU;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MainActivity extends AppCompatActivity {
 
     public CommandListener commandListener;
@@ -66,8 +70,13 @@ public class MainActivity extends AppCompatActivity {
                     textView.setText("Listening...");
 
                 }
+                else if (msg.arg1==Constants.ASR_TIME_OUT){
+                    commandListener.StopSearch();
+                    textView.setText("IN MIND AGENT");
+                    commandListener.Search("cmd_start", -1);
+                }
                 else if (msg.arg1==-1){
-                    //================== pipeline =====================
+
                     //String asrOutput = (String)msg.obj;
                     NLU.NLUState nluState = nlu.understanding((String)msg.obj);
                     dm.inputNLUState(nluState);
@@ -79,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
                     //nlg
                 }
                 else if (msg.arg1==Constants.ASR_OUTPUT){
-                    //commandListener.Search("cmd1",7000);
+                    //================== pipeline =====================
                     textView.setText((String) msg.obj);
                     NLU.NLUState nluState = nlu.understanding((String)msg.obj);
                     dm.inputNLUState(nluState);
@@ -90,7 +99,8 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 else if (msg.arg1==Constants.TTS_COMPLETE){
-                    commandListener.SuperSearch("cmd1", 7000);
+                    commandListener.SuperSearch("cmd1", 5000);
+                    textView.setText("Listening...");
                     /*
                     System.out.println("tts: "+(String)msg.obj);
                     if(((String)msg.obj).equals("Yes"))
@@ -125,9 +135,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Perform action on click
                 //commandListener.Search("cmd_start",-1);
+                textView.setText("IN MIND AGENT");
                 commandListener.Search("cmd_start", 4000);
                 //commandListener.SuperSearch("cmd1", 4000);
-                textView.setText("Listening...");
+                //textView.setText("Listening...");
                 //commandListener.Search("cmd_start", -1);
             }
         });
@@ -135,13 +146,14 @@ public class MainActivity extends AppCompatActivity {
         stopButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 commandListener.StopSearch();
+                textView.setText("STOP");
             }
         });
 
         asrButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 commandListener.Search("cmd_start", -1);
-                textView.setText("Listening...");
+                textView.setText("IN MIND AGENT");
                 //commandListener.StopSearch();
                 //try{
                 //String asrOutput = bingRecognizer.BingSuperRecognition();
@@ -156,10 +168,10 @@ public class MainActivity extends AppCompatActivity {
     public void startGMail(View view){
         //Intent intent = new Intent(this, GmailActivity.class);
         //startActivity(intent);
-        List<String> labels = new ArrayList<String>();
         //gm.updateLabelLstFromGmail();
+        //if()
         gm.updateUnReadLstFromGmail();
-        System.out.println(labels);
+        
     }
 
     @Override
