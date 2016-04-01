@@ -18,12 +18,14 @@ public class DialogOne {
 
     List<String> dialogIntent;
     dialogueState state;
+    gmailResponse gmr;
 
     public DialogOne(GmailManager gm,NLG nlg, List<String> dialogIntent){
         this.gm = gm;
         this.nlg = nlg;
         this.dialogIntent = dialogIntent;
         state = new dialogueState();
+        gmr = new gmailResponse();
     }
 
     public void inputNLUState(NLU.NLUState nluState){
@@ -62,9 +64,19 @@ public class DialogOne {
             }
 
         }
+        else if(state.getCurrentIntent().equals("search")){
+            gm.searchLstFromGmail(nluState.getQuery(),gmr);
+        }
     }
 
-    //===action set: read, check, summarize, repeat, spell
+    public class gmailResponse {
+        public void informSearchResults(int num){
+            nlg.InformFound(num);
+            state.setLastAction("search");
+        }
+    }
+
+    //===action set: read, check, summarize, repeat, spell, search
     public class dialogueState{
         String lastAction;
         String currentIntent;
@@ -89,4 +101,6 @@ public class DialogOne {
             this.currentIntent = currentIntent;
         }
     }
+
+
 }

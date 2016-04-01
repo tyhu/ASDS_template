@@ -126,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
         dialogIntent.add("check");
         dialogIntent.add("repeat");
         dialogIntent.add("spell");
+        dialogIntent.add("search");
         nlu = new NLU(dialogIntent);
         nlg = new NLG(context,commandHandler);
         dm = new DialogOne(gm,nlg,dialogIntent);
@@ -171,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
         //gm.updateLabelLstFromGmail();
         //if()
         gm.updateUnReadLstFromGmail();
-        
     }
 
     @Override

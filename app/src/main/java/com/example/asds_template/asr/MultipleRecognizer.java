@@ -83,12 +83,14 @@ public class MultipleRecognizer {
         wav_header = new byte[44];
         //File sampleWav=new File("/sdcard/history.raw.wav");
         File sampleWav=new File("/sdcard/tmp.wav");
+
         try(FileInputStream in = new FileInputStream(sampleWav)){
             in.read(wav_header);
         }catch(Exception ex){
             Log.e("VS", "exception: " + ex.getMessage());
         }
     }
+
 
     public void addListener(RecognitionListener listener) {
         Collection var2 = this.listeners;

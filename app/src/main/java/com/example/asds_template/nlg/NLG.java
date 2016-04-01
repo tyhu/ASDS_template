@@ -20,6 +20,17 @@ public class NLG{
         tts.speakThis(output);
     }
 
+    public void InformFound(int num){
+        if(num==0)
+            tts.speakThis("no unread email found");
+        else{
+            String numStr = String.valueOf(num);
+            String output = numStr+" unread emails found";
+            tts.speakThis(output);
+        }
+
+    }
+
     public void InformUnread(int num){
         if(num==-1)
             tts.speakThis("Connection Error, please check your internet");

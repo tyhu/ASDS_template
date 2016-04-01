@@ -11,6 +11,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 
+import com.example.asds_template.dm.DialogOne;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -121,8 +122,20 @@ public class GmailManager {
     }
 
     public Message getMsg(int order){
-        return messages.get(order);
+        Message msg = messages.get(order);
+        return msg;
     }
+
+    public int getOrder(String msgid){
+        int order = -1;
+        for(int i=0;i<messages.size();i++)
+            if(messages.get(i).getId().equals(msgid)){
+                order = i;
+                break;
+            }
+        return order;
+    }
+
     public String getSender(int order){
         String sender = "unknown ";
         String jstr = getMsg(order).getPayload().getHeaders().toString();
@@ -141,39 +154,9 @@ public class GmailManager {
         return sender;
     }
 
-    public void searchLstFromGmail(String q){
-        this.query = q;
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                if(mCredential.getSelectedAccountName() == null)
-                    chooseAccount();
-                com.google.api.services.gmail.Gmail mService = getGmailService();
-
-                String user = "me";
-                ArrayList<String> tmpLabs = new ArrayList<String>();
-                //if(messages == null)
-
-                tmpLabs.add("UNREAD");
-                try {
-                    ListMessagesResponse listResponse = mService.users().messages().list(user)
-                            .setLabelIds(tmpLabs).setQ(query).execute();
-                    //System.out.println(listResponse.size());
-                    messages.clear();
-                    for (Message msg : listResponse.getMessages()) {
-                        //System.out.println(msg.getId());
-                        //Message message = mService.users().messages().get(user, msg.getId()).setFormat("raw").execute();
-                        Message message = mService.users().messages().get(user, msg.getId()).execute();
-                        messages.add(message);
-                    }
-                } catch (Exception e){
-                    System.out.println(e.toString());
-                    requestException(e);
-                }
-
-                return null;
-            }
-        }.execute();
+    public void searchLstFromGmail(String q, DialogOne.gmailResponse gmr){
+        Searchtask searchtask = new Searchtask(gmr,q);
+        searchtask.execute();
     }
 
     public void updateUnReadLstFromGmail(){
@@ -268,6 +251,51 @@ public class GmailManager {
         }
     }
 
+    private class Searchtask extends AsyncTask<Void, Void, Void> {
+        private DialogOne.gmailResponse gmr;
+        private String query;
+        public Searchtask(DialogOne.gmailResponse gmr, String query){
+            this.gmr = gmr;
+            this.query = query;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            if(mCredential.getSelectedAccountName() == null)
+                chooseAccount();
+            com.google.api.services.gmail.Gmail mService = getGmailService();
+
+            String user = "me";
+            ArrayList<String> tmpLabs = new ArrayList<String>();
+            //if(messages == null)
+
+            tmpLabs.add("UNREAD");
+            try {
+                ListMessagesResponse listResponse = mService.users().messages().list(user)
+                        .setLabelIds(tmpLabs).setQ(query).execute();
+                System.out.println(listResponse.size()+" emails retrieved");
+                messages.clear();
+                for (Message msg : listResponse.getMessages()) {
+                    System.out.println(msg.getId());
+                    //Message message = mService.users().messages().get(user, msg.getId()).setFormat("raw").execute();
+                    Message message = mService.users().messages().get(user, msg.getId()).execute();
+                    messages.add(message);
+                }
+            } catch (Exception e){
+                System.out.println(e.toString());
+                requestException(e);
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            gmr.informSearchResults(messages.size());
+        }
+    }
+
     private class MarkRequestTask extends AsyncTask<Void, Void, Void> {
         private String msgId;
 
@@ -286,7 +314,7 @@ public class GmailManager {
             } catch (IOException e) {
                 System.out.println(e.toString());
             }
-            updateUnReadLstFromGmail();
+            messages.remove(getOrder(msgId));
             return null;
         }
     }

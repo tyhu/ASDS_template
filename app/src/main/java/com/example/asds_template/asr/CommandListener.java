@@ -183,7 +183,7 @@ public class CommandListener implements RecognitionListener  {
     public void onPartialResult(Hypothesis hypothesis) {
         if(hypothesis != null){
             String cmd = hypothesis.getHypstr();
-            System.out.println(cmd);
+            System.out.println("recognition output: "+cmd);
             if (cmd.equals(START_KEY)){
                 Message msg = new Message();
                 msg.arg1 = Constants.KEYWD_DETECTED;
@@ -199,12 +199,13 @@ public class CommandListener implements RecognitionListener  {
                 useBing = false;
                 recognizer.stop();
             }
+            /*
             else if (cmd.endsWith("terminate")){
                 System.out.println("we have time out");
                 Message msg = new Message();
                 msg.arg1 = Constants.ASR_TIME_OUT;
                 commandHandler.sendMessage(msg);
-            }
+            }*/
             else if (cmd.contains("[bing]")){
                 Message msg = new Message();
                 msg.arg1 = Constants.ASR_OUTPUT;

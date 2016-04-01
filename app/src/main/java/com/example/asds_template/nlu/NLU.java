@@ -17,14 +17,29 @@ public class NLU {
         List<String> tokens = Arrays.asList(asrInput.split(" "));
         nluState.intentIdx = 2;
         System.out.println(tokens);
-        if(tokens.contains("email")){
+        if(tokens.contains("search")){
+            nluState.intentIdx = 5;
+            nluState.query = extractQuery(asrInput);
+        }
+        else if(tokens.contains("email")){
             nluState.intentIdx = 0;
             nluState.order = 0;
         }
         else if(tokens.contains("repeat")){
             nluState.intentIdx = 3;
         }
+
         return nluState;
+    }
+    public String extractQuery(String asrinput){
+        String q = "";
+        List<String> tokens = Arrays.asList(asrinput.split(" "));
+        int idx = tokens.indexOf("about");
+        if(idx<0)
+            idx = tokens.indexOf("from");
+        if(idx<tokens.size()-1) q = tokens.get(idx+1);
+        System.out.println("query extracted: "+q);
+        return q;
     }
 
     public class NLUState{
