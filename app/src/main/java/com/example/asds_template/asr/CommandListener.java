@@ -100,14 +100,16 @@ public class CommandListener implements RecognitionListener  {
         recognizer.addKeyphraseSearch(CMD_START, "in mind agent");
         recognizer.addKeyphraseSearch(CMD_REPLY_ONLY, REPLY_EMAIL);
         recognizer.addKeyphraseSearch(CMD_FINAL, TERMINATE_WORD);
-        File cmd1Grammar = new File(assetsDir, "cmd1.gram");
-        File cmd2Grammar = new File(assetsDir, "cmd2.gram");
-        File contactGrammar = new File(assetsDir, "contact2.gram");
-        File continueGrammar = new File(assetsDir, "continue.gram");
-        recognizer.addGrammarSearch(CMD_TYPE1, cmd1Grammar);
-        recognizer.addGrammarSearch("cmd2", cmd2Grammar);
-        recognizer.addGrammarSearch(CMD_CONTACT, contactGrammar);
-        recognizer.addGrammarSearch(CMD_CONTI, continueGrammar);
+        File kwlst = new File(assetsDir,"kw.txt");
+        recognizer.addKeywordSearch("KW1",kwlst);
+        //File cmd1Grammar = new File(assetsDir, "cmd1.gram");
+        //File cmd2Grammar = new File(assetsDir, "cmd2.gram");
+        //File contactGrammar = new File(assetsDir, "contact2.gram");
+        //File continueGrammar = new File(assetsDir, "continue.gram");
+        //recognizer.addGrammarSearch(CMD_TYPE1, cmd1Grammar);
+        //recognizer.addGrammarSearch("cmd2", cmd2Grammar);
+        //recognizer.addGrammarSearch(CMD_CONTACT, contactGrammar);
+        //recognizer.addGrammarSearch(CMD_CONTI, continueGrammar);
         //TODO
         //I should define all the searching type here
         /** In your application you might not need to add all those searches.
@@ -190,22 +192,20 @@ public class CommandListener implements RecognitionListener  {
                 recognizer.stop();
                 commandHandler.sendMessage(msg);
             }
-            else if (cmd.endsWith("next email")){
+            else if (cmd.endsWith("next email")||cmd.endsWith("check in box")||cmd.endsWith("repeat that")){
                 Message msg = new Message();
                 msg.arg1 = Constants.ASR_OUTPUT;
                 msg.obj = cmd;
-
                 commandHandler.sendMessage(msg);
                 useBing = false;
                 recognizer.stop();
             }
-            /*
             else if (cmd.endsWith("terminate")){
                 System.out.println("we have time out");
                 Message msg = new Message();
                 msg.arg1 = Constants.ASR_TIME_OUT;
                 commandHandler.sendMessage(msg);
-            }*/
+            }
             else if (cmd.contains("[bing]")){
                 Message msg = new Message();
                 msg.arg1 = Constants.ASR_OUTPUT;

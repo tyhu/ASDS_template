@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         asrButton = (Button) findViewById(R.id.bingASRButton);
         //gmailButton = (Button) findViewById(R.id.gmail_button);
         textView = (TextView) findViewById(R.id.textView);
-
+        setTitle("InMind Agent Template");
         //allow main thread execute network operation
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -72,8 +72,9 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if (msg.arg1==Constants.ASR_TIME_OUT){
                     commandListener.StopSearch();
+                    gm.updateUnReadLstFromGmail();
                     textView.setText("IN MIND AGENT");
-                    commandListener.Search("cmd_start", -1);
+                    commandListener.Search("cmd_start", 20000);
                 }
                 else if (msg.arg1==-1){
 
@@ -99,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 else if (msg.arg1==Constants.TTS_COMPLETE){
-                    commandListener.SuperSearch("cmd1", 5000);
+                    commandListener.SuperSearch("KW1", 5000);
                     textView.setText("Listening...");
                     /*
                     System.out.println("tts: "+(String)msg.obj);
@@ -153,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
 
         asrButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                commandListener.Search("cmd_start", -1);
+                commandListener.Search("cmd_start", 20000);
                 textView.setText("IN MIND AGENT");
                 //commandListener.StopSearch();
                 //try{
