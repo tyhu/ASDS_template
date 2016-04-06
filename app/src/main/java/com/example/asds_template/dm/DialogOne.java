@@ -28,6 +28,10 @@ public class DialogOne {
         gmr = new gmailResponse();
     }
 
+    public void experiment(){
+
+    }
+
     public void inputNLUState(NLU.NLUState nluState){
         int intentIdx = nluState.getIntent();
         state.setCurrentIntent(dialogIntent.get(intentIdx));

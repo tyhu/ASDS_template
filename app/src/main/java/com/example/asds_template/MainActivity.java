@@ -100,8 +100,8 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 else if (msg.arg1==Constants.TTS_COMPLETE){
-                    commandListener.SuperSearch("KW1", 5000);
-                    textView.setText("Listening...");
+                    //commandListener.SuperSearch("KW1", 5000);
+                    //textView.setText("Listening...");
                     /*
                     System.out.println("tts: "+(String)msg.obj);
                     if(((String)msg.obj).equals("Yes"))
