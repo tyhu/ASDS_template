@@ -204,6 +204,12 @@ public class CommandListener implements RecognitionListener  {
                 recognizer.stop();
                 commandHandler.sendMessage(msg);
             }
+            else if (cmd.equals("repeat that")){
+                Message msg = new Message();
+                msg.arg1 = Constants.ASR_REPEAT;
+                recognizer.stop();
+                commandHandler.sendMessage(msg);
+            }
             /*
             if (cmd.equals(START_KEY)){
                 Message msg = new Message();

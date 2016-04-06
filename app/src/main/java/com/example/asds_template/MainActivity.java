@@ -149,6 +149,15 @@ public class MainActivity extends AppCompatActivity {
                     nlg.speakRaw("your email has been sent");
                     commandListener.Search("KW1", 20000);
                 }
+                else if (msg.arg1== Constants.ASR_REPEAT){
+                    if (emailIdx>emails.size()-1){
+                        nlg.speakRaw("there is no more email");
+                    }
+                    else{
+                        nlg.speakRaw(emails.get(emailIdx));
+                        commandListener.Search("KW1", 20000);
+                    }
+                }
                 return false;
             }
         });
