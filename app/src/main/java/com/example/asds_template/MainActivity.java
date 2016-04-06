@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     DialogOne dm;
 
     //for experiment
+    int nexttag = 0;
     int emailIdx = -1;
     ArrayList<String> emails;
 
@@ -69,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         emails.add("Steve said, We're going to Spice Island for your birthday.  Does tonight at 7 work for you?");
         emails.add("Tony said, Happy Birthday, Tell me 5 things that you would like, and I will surprise you with one at the party");
         emails.add("Mom said, What did you have for dinner last night?");
-        emails.add("Hey, I'm having friends over to watch some movies tonight on Netflix, can you suggest three?");
+        emails.add("Justin said, Hey, I'm having friends over to watch some movies tonight on Netflix, can you suggest three?");
         emails.add("From your professor, I have not received your assignment, why?");
 
         commandHandler = new Handler(new Handler.Callback() {
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 else if (msg.arg1==Constants.ASR_TIME_OUT){
+                    textView.setText("STOP");
                     //commandListener.StopSearch();
                     //gm.updateUnReadLstFromGmail();
                     //textView.setText("IN MIND AGENT");
@@ -113,6 +115,13 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 else if (msg.arg1==Constants.TTS_COMPLETE){
+                    textView.setText("Listening...");
+                    if (nexttag==1){
+                        commandListener.Search("cmd_final", -1);
+                    }
+                    else if (nexttag==0){
+                        commandListener.SuperSearch("KW1", 20000);
+                    }
                     //commandListener.SuperSearch("KW1", 5000);
                     //textView.setText("Listening...");
                     /*
@@ -127,35 +136,33 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if (msg.arg1==Constants.ASR_NEXT_EMAIL){
                     emailIdx+=1;
+                    nexttag = 0;
                     if (emailIdx>emails.size()-1){
                         nlg.speakRaw("there is no more email");
                     }
                     else{
                         nlg.speakRaw(emails.get(emailIdx));
-                        commandListener.Search("KW1", 20000);
+                        //commandListener.SuperSearch("KW1", 20000);
                     }
                 }
                 else if (msg.arg1==Constants.ASR_REPLY_EMAIL){
+                    nexttag = 1;
                     nlg.speakRaw("say terminate when you finish, you can start to speak now");
-                    try {
-                        Thread.sleep(3000);
-                    } catch (InterruptedException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    commandListener.Search("cmd_final", -1);
+
                 }
                 else if (msg.arg1== Constants.ASR_TERMINATE){
+                    nexttag = 0;
                     nlg.speakRaw("your email has been sent");
-                    commandListener.Search("KW1", 20000);
+                    //commandListener.Search("KW1", 20000);
                 }
                 else if (msg.arg1== Constants.ASR_REPEAT){
+                    nexttag = 0;
                     if (emailIdx>emails.size()-1){
                         nlg.speakRaw("there is no more email");
                     }
                     else{
                         nlg.speakRaw(emails.get(emailIdx));
-                        commandListener.Search("KW1", 20000);
+                        //commandListener.Search("KW1", 20000);
                     }
                 }
                 return false;
@@ -183,7 +190,8 @@ public class MainActivity extends AppCompatActivity {
                 // Perform action on click
                 //commandListener.Search("cmd_start",-1);
                 //textView.setText("IN MIND AGENT");
-                commandListener.Search("KW1", 20000);
+                commandListener.SuperSearch("KW1", 20000);
+                textView.setText("Listening...");
                 //commandListener.SuperSearch("cmd1", 4000);
                 //textView.setText("Listening...");
                 //commandListener.Search("cmd_start", -1);

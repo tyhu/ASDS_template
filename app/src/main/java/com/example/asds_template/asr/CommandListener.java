@@ -186,29 +186,33 @@ public class CommandListener implements RecognitionListener  {
         if(hypothesis != null){
             String cmd = hypothesis.getHypstr();
             System.out.println("recognition output: "+cmd);
-            if(cmd.equals("read next email")){
+            if(cmd.contains("next email")){
                 Message msg = new Message();
                 msg.arg1 = Constants.ASR_NEXT_EMAIL;
                 recognizer.stop();
                 commandHandler.sendMessage(msg);
             }
-            else if (cmd.equals("reply email")){
+            else if (cmd.contains("reply email")){
                 Message msg = new Message();
                 msg.arg1 = Constants.ASR_REPLY_EMAIL;
                 recognizer.stop();
                 commandHandler.sendMessage(msg);
             }
-            else if(cmd.equals("terminate")){
+            else if(cmd.contains("terminate")){
                 Message msg = new Message();
                 msg.arg1 = Constants.ASR_TERMINATE;
                 recognizer.stop();
                 commandHandler.sendMessage(msg);
             }
-            else if (cmd.equals("repeat that")){
+            else if (cmd.contains("repeat that")){
                 Message msg = new Message();
                 msg.arg1 = Constants.ASR_REPEAT;
                 recognizer.stop();
                 commandHandler.sendMessage(msg);
+            }
+            else if (cmd.contains("[bing]")){
+                recognizer.stop();
+                recognizer.startSuperListening("KW1",8000);
             }
             /*
             if (cmd.equals(START_KEY)){
