@@ -9,6 +9,9 @@ public class Constants {
     public static final int ASR_TIME_OUT = 1;
     public static final int ASR_OUTPUT = 2;
     public static final int TTS_COMPLETE = 3;
+    public static final int ASR_NEXT_EMAIL = 4;
+    public static final int ASR_REPLY_EMAIL = 5;
+    public static final int ASR_TERMINATE = 6;
 
     public static final int REQUEST_ACCOUNT_PICKER = 1000;
     public static final int REQUEST_AUTHORIZATION = 1001;

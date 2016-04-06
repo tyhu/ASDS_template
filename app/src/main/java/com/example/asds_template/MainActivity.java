@@ -43,6 +43,10 @@ public class MainActivity extends AppCompatActivity {
     NLG nlg;
     DialogOne dm;
 
+    //for experiment
+    int emailIdx = -1;
+    ArrayList<String> emails;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,12 +56,21 @@ public class MainActivity extends AppCompatActivity {
         asrButton = (Button) findViewById(R.id.bingASRButton);
         //gmailButton = (Button) findViewById(R.id.gmail_button);
         textView = (TextView) findViewById(R.id.textView);
-        setTitle("InMind Agent Template");
+        setTitle("InMind Agent Template (for experiment)");
         //allow main thread execute network operation
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
+
+        //hard code each email
+        emails = new ArrayList<String>();
+        emails.add("mom said, how are you today?");
+        emails.add("Steve said, We're going to Spice Island for your birthday.  Does tonight at 7 work for you?");
+        emails.add("Tony said, Happy Birthday, Tell me 5 things that you would like, and I will surprise you with one at the party");
+        emails.add("Mom said, What did you have for dinner last night?");
+        emails.add("Hey, I'm having friends over to watch some movies tonight on Netflix, can you suggest three?");
+        emails.add("From your professor, I have not received your assignment, why?");
 
         commandHandler = new Handler(new Handler.Callback() {
             @Override
@@ -71,10 +84,10 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 else if (msg.arg1==Constants.ASR_TIME_OUT){
-                    commandListener.StopSearch();
-                    gm.updateUnReadLstFromGmail();
-                    textView.setText("IN MIND AGENT");
-                    commandListener.Search("cmd_start", 20000);
+                    //commandListener.StopSearch();
+                    //gm.updateUnReadLstFromGmail();
+                    //textView.setText("IN MIND AGENT");
+                    //commandListener.Search("cmd_start", 20000);
                 }
                 else if (msg.arg1==-1){
 
@@ -111,7 +124,30 @@ public class MainActivity extends AppCompatActivity {
                         commandListener.Search("cmd_start", -1);
                     }
                     */
-
+                }
+                else if (msg.arg1==Constants.ASR_NEXT_EMAIL){
+                    emailIdx+=1;
+                    if (emailIdx>emails.size()-1){
+                        nlg.speakRaw("there is no more email");
+                    }
+                    else{
+                        nlg.speakRaw(emails.get(emailIdx));
+                        commandListener.Search("KW1", 20000);
+                    }
+                }
+                else if (msg.arg1==Constants.ASR_REPLY_EMAIL){
+                    nlg.speakRaw("say terminate when you finish, you can start to speak now");
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    commandListener.Search("cmd_final", -1);
+                }
+                else if (msg.arg1== Constants.ASR_TERMINATE){
+                    nlg.speakRaw("your email has been sent");
+                    commandListener.Search("KW1", 20000);
                 }
                 return false;
             }
@@ -137,8 +173,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Perform action on click
                 //commandListener.Search("cmd_start",-1);
-                textView.setText("IN MIND AGENT");
-                commandListener.Search("cmd_start", 4000);
+                //textView.setText("IN MIND AGENT");
+                commandListener.Search("KW1", 20000);
                 //commandListener.SuperSearch("cmd1", 4000);
                 //textView.setText("Listening...");
                 //commandListener.Search("cmd_start", -1);
@@ -164,7 +200,9 @@ public class MainActivity extends AppCompatActivity {
                 //    Log.e("ASDS", e.getMessage());}
             }
         });
-        gm.updateUnReadLstFromGmail();
+        asrButton.setEnabled(false);
+
+        //gm.updateUnReadLstFromGmail();
     }
 
     public void startGMail(View view){
@@ -172,7 +210,8 @@ public class MainActivity extends AppCompatActivity {
         //startActivity(intent);
         //gm.updateLabelLstFromGmail();
         //if()
-        gm.updateUnReadLstFromGmail();
+        emailIdx = -1;
+        //gm.updateUnReadLstFromGmail();
     }
 
     @Override

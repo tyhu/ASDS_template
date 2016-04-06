@@ -186,6 +186,25 @@ public class CommandListener implements RecognitionListener  {
         if(hypothesis != null){
             String cmd = hypothesis.getHypstr();
             System.out.println("recognition output: "+cmd);
+            if(cmd.equals("read next email")){
+                Message msg = new Message();
+                msg.arg1 = Constants.ASR_NEXT_EMAIL;
+                recognizer.stop();
+                commandHandler.sendMessage(msg);
+            }
+            else if (cmd.equals("reply email")){
+                Message msg = new Message();
+                msg.arg1 = Constants.ASR_REPLY_EMAIL;
+                recognizer.stop();
+                commandHandler.sendMessage(msg);
+            }
+            else if(cmd.equals("terminate")){
+                Message msg = new Message();
+                msg.arg1 = Constants.ASR_TERMINATE;
+                recognizer.stop();
+                commandHandler.sendMessage(msg);
+            }
+            /*
             if (cmd.equals(START_KEY)){
                 Message msg = new Message();
                 msg.arg1 = Constants.KEYWD_DETECTED;
@@ -212,7 +231,7 @@ public class CommandListener implements RecognitionListener  {
                 msg.obj = cmd;
                 if (useBing)
                     commandHandler.sendMessage(msg);
-            }
+            }*/
             //else if (cmd.contains())
 
         }
