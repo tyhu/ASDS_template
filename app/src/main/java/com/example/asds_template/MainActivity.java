@@ -172,7 +172,9 @@ public class MainActivity extends AppCompatActivity {
         //startActivity(intent);
         //gm.updateLabelLstFromGmail();
         //if()
-        gm.updateUnReadLstFromGmail();
+        //gm.updateUnReadLstFromGmail();
+        IMAPManager imap = new IMAPManager();
+        imap.checkInBox();
     }
 
     @Override
