@@ -14,6 +14,8 @@ import java.io.BufferedWriter;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -21,6 +23,8 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,16 +65,23 @@ public class MultipleRecognizer {
     private URL url;
     private byte[] wav_header;
     //private final int sampleRate=16000;
+;
+    Calendar calendar;
+    SimpleDateFormat df1;
 
     protected MultipleRecognizer(Config config, String client_id,String client_secret) throws IOException {
         this.decoder = new Decoder(config);
         this.sampleRate = (int)this.decoder.getConfig().getFloat("-samprate");
-        this.bufferSize = Math.round((float)this.sampleRate * 0.4F);
+        this.bufferSize = Math.round((float) this.sampleRate * 0.4F);
         this.recorder = new AudioRecord(6, this.sampleRate, 16, 2, this.bufferSize * 2);
         if(this.recorder.getState() == 0) {
             this.recorder.release();
             throw new IOException("Failed to initialize recorder. Microphone might be already in use.");
         }
+
+        //for recording
+        calendar = Calendar.getInstance();
+        df1 = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss a");
 
         //For Bing ASR
         this.client_id = client_id;
@@ -332,52 +343,72 @@ public class MultipleRecognizer {
         }
 
         public void run() {
-            recorder.startRecording();
-            if(recorder.getRecordingState() == 1) {
-                recorder.stop();
-                IOException buffer1 = new IOException("Failed to start recording. Microphone might be already in use.");
-                mainHandler.post(new OnErrorEvent(buffer1));
-            } else {
-                Log.d(MyRecognizer.TAG, "Starting decoding");
-                decoder.startUtt();
-                short[] buffer = new short[bufferSize];
-                boolean inSpeech = decoder.getInSpeech();
-                recorder.read(buffer, 0, buffer.length);
 
-                while(!interrupted() && (this.timeoutSamples == -1 || this.remainingSamples > 0)) {
-                    int nread = recorder.read(buffer, 0, buffer.length);
-                    if(-1 == nread) {
-                        throw new RuntimeException("error reading audio buffer");
-                    }
+            //recording .wav file
+            calendar = Calendar.getInstance();
+            FileOutputStream out = null;
+            String audiofn = df1.format(calendar.getTime());
+            audiofn = audiofn.replace(" ","_")+".raw";
 
-                    if(nread > 0) {
-                        decoder.processRaw(buffer, (long)nread, false, false);
-                        if(decoder.getInSpeech() != inSpeech) {
-                            inSpeech = decoder.getInSpeech();
-                            mainHandler.post(new InSpeechChangeEvent(inSpeech));
+            try {
+                out = new FileOutputStream("/sdcard/yahoo_test/"+audiofn);
+                System.out.println("wav file name: "+audiofn);
+
+                recorder.startRecording();
+                if(recorder.getRecordingState() == 1) {
+                    recorder.stop();
+                    IOException buffer1 = new IOException("Failed to start recording. Microphone might be already in use.");
+                    mainHandler.post(new OnErrorEvent(buffer1));
+                } else {
+                    Log.d(MyRecognizer.TAG, "Starting decoding");
+                    decoder.startUtt();
+                    short[] buffer = new short[bufferSize];
+                    byte[] bytebuf;
+                    boolean inSpeech = decoder.getInSpeech();
+                    recorder.read(buffer, 0, buffer.length);
+
+                    while(!interrupted() && (this.timeoutSamples == -1 || this.remainingSamples > 0)) {
+                        int nread = recorder.read(buffer, 0, buffer.length);
+                        if(-1 == nread) {
+                            throw new RuntimeException("error reading audio buffer");
                         }
 
-                        //remove the inSpeech detection
-                        //if(inSpeech) {
-                        //    this.remainingSamples = this.timeoutSamples;
-                        //}
+                        if(nread > 0) {
+                            bytebuf = short2byte(buffer, buffer.length);
+                            decoder.processRaw(buffer, (long)nread, false, false);
+                            if(decoder.getInSpeech() != inSpeech) {
+                                inSpeech = decoder.getInSpeech();
+                                mainHandler.post(new InSpeechChangeEvent(inSpeech));
+                            }
+                            out.write(bytebuf);
 
-                        Hypothesis hypothesis = decoder.hyp();
-                        mainHandler.post(new ResultEvent(hypothesis, false));
+                            //remove the inSpeech detection
+                            //if(inSpeech) {
+                            //    this.remainingSamples = this.timeoutSamples;
+                            //}
+
+                            Hypothesis hypothesis = decoder.hyp();
+                            mainHandler.post(new ResultEvent(hypothesis, false));
+                        }
+
+                        if(this.timeoutSamples != -1) {
+                            this.remainingSamples -= nread;
+                        }
+                    }
+                    recorder.stop();
+                    decoder.endUtt();
+                    mainHandler.removeCallbacksAndMessages((Object)null);
+                    if(this.timeoutSamples != -1 && this.remainingSamples <= 0) {
+                        mainHandler.post(new TimeoutEvent());
                     }
 
-                    if(this.timeoutSamples != -1) {
-                        this.remainingSamples -= nread;
-                    }
                 }
-                MFCCQueue.clear();
-                recorder.stop();
-                decoder.endUtt();
-                mainHandler.removeCallbacksAndMessages((Object)null);
-                if(this.timeoutSamples != -1 && this.remainingSamples <= 0) {
-                    mainHandler.post(new TimeoutEvent());
-                }
-
+                out.flush();
+                out.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
             }
         }
     }
