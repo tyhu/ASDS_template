@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">ASDS_template</string>
     <string name="title_activity_gmail">GmailActivity</string>
+    <string name="title_activity_imap_login">ImapLoginActivity</string>
 </resources>

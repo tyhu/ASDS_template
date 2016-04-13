@@ -78,6 +78,7 @@ public class CommandListener implements RecognitionListener  {
         // The recognizer can be configured to perform multiple searches
         // of different kind and switch between them
 
+        File sampleHeader = new File(assetsDir,"tmp.wav");
         //recognizer = defaultSetup()
         recognizer = MyRecognizerSetup.defaultSetup()
                 .setAcousticModel(new File(assetsDir, "en-us-ptm"))
@@ -92,7 +93,7 @@ public class CommandListener implements RecognitionListener  {
 
                         // Use context-independent phonetic search, context-dependent is too slow for mobile
                 .setBoolean("-allphone_ci", true)
-                .getMultipleRecognizer(client_id,client_secret);
+                .getMultipleRecognizer(client_id,client_secret, sampleHeader);
                 //.getRecognizer();
         recognizer.addListener(this);
 

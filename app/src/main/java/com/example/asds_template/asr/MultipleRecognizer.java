@@ -62,7 +62,7 @@ public class MultipleRecognizer {
     private byte[] wav_header;
     //private final int sampleRate=16000;
 
-    protected MultipleRecognizer(Config config, String client_id,String client_secret) throws IOException {
+    protected MultipleRecognizer(Config config, String client_id,String client_secret, File sampleWav) throws IOException {
         this.decoder = new Decoder(config);
         this.sampleRate = (int)this.decoder.getConfig().getFloat("-samprate");
         this.bufferSize = Math.round((float)this.sampleRate * 0.4F);
@@ -82,7 +82,7 @@ public class MultipleRecognizer {
         }
         wav_header = new byte[44];
         //File sampleWav=new File("/sdcard/history.raw.wav");
-        File sampleWav=new File("/sdcard/tmp.wav");
+        //File sampleWav=new File("/sdcard/tmp.wav");
 
         try(FileInputStream in = new FileInputStream(sampleWav)){
             in.read(wav_header);

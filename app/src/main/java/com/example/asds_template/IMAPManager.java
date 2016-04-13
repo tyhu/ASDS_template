@@ -1,5 +1,8 @@
 package com.example.asds_template;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 import javax.mail.Address;
@@ -21,6 +24,9 @@ public class IMAPManager {
     private String user;
     private String passwd;
 
+    List<Message> messages;
+    Message current_msg;
+
     private boolean auth;
     private boolean debuggable;
 
@@ -40,6 +46,8 @@ public class IMAPManager {
             store.connect(host, user, passwd);
             Folder inbox = store.getFolder("INBOX");
             inbox.open(Folder.READ_ONLY);
+            messages = Arrays.asList(inbox.getMessages());
+
             Message msg = inbox.getMessage(inbox.getMessageCount());
             Address[] in = msg.getFrom();
             for (Address address : in) {
