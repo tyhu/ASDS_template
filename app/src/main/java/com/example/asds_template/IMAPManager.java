@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import javax.mail.Address;
 import javax.mail.BodyPart;
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -14,6 +15,7 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Store;
+import javax.mail.search.FlagTerm;
 
 /**
  * Created by TingYao on 4/11/2016.
@@ -46,8 +48,10 @@ public class IMAPManager {
             store.connect(host, user, passwd);
             Folder inbox = store.getFolder("INBOX");
             inbox.open(Folder.READ_ONLY);
-            messages = Arrays.asList(inbox.getMessages());
-
+            FlagTerm ft = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
+            messages = Arrays.asList(inbox.search(ft));
+            System.out.println("num of msg: "+messages.size());
+            /*
             Message msg = inbox.getMessage(inbox.getMessageCount());
             Address[] in = msg.getFrom();
             for (Address address : in) {
@@ -57,9 +61,19 @@ public class IMAPManager {
             BodyPart bp = mp.getBodyPart(0);
             System.out.println("SENT DATE:" + msg.getSentDate());
             System.out.println("SUBJECT:" + msg.getSubject());
-            System.out.println("CONTENT:" + bp.getContent());
+            System.out.println("CONTENT:" + bp.getContent());*/
         } catch (Exception mex) {
             mex.printStackTrace();
         }
+    }
+
+    public int getUnReadNum(){
+        return messages.size();
+    }
+
+    public Message getMsg(int order){
+        Message msg = messages.get(order);
+
+        return msg;
     }
 }
