@@ -1,6 +1,7 @@
 package com.example.asds_template;
 
 import android.accounts.AccountManager;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 
 import com.example.asds_template.asr.CommandListener;
 import com.example.asds_template.dm.DialogOne;
+import com.example.asds_template.dm.DialogTwo;
 import com.example.asds_template.nlg.NLG;
 
 import java.util.ArrayList;
@@ -39,9 +41,12 @@ public class MainActivity extends AppCompatActivity {
     Button asrButton;
 
     GmailManager gm;
+    IMAPManager imap;
     NLU nlu;
     NLG nlg;
-    DialogOne dm;
+    DialogTwo dm;
+
+    SharedPreferences  inmindSharedPreferences ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean handleMessage(Message msg) {
                 if (msg.arg1==Constants.KEYWD_DETECTED){
-                    //start keyword
+                    //====start keyword
                     //commandListener.Search("cmd1",7000);
                     nlg.speakRaw("Yes");
                     //commandListener.SuperSearch("cmd1", 4000);
@@ -130,7 +135,21 @@ public class MainActivity extends AppCompatActivity {
         dialogIntent.add("search");
         nlu = new NLU(dialogIntent);
         nlg = new NLG(context,commandHandler);
-        dm = new DialogOne(gm,nlg,dialogIntent);
+
+        //=====imap log in
+        inmindSharedPreferences = getSharedPreferences(Constants.PREFERENCE_NAME, Activity.MODE_PRIVATE);
+
+        //startActivity(imapLogin);
+        if(!inmindSharedPreferences.contains(Constants.LOGINED_FLAG)) {
+            Intent imapLogin = new Intent().setClass(this.context,ImapLoginActivity.class);
+            startActivityForResult(imapLogin,Constants.RECEIVE_IMAP_LOGIN);
+        }
+        else
+            System.out.println("Hey! login info existed!!!!");
+        initialImap();
+        //=====end of imap log in
+
+        dm = new DialogTwo(imap,nlg,dialogIntent);
 
 
         voiceCMD.setOnClickListener(new View.OnClickListener() {
@@ -164,7 +183,14 @@ public class MainActivity extends AppCompatActivity {
                 //    Log.e("ASDS", e.getMessage());}
             }
         });
-        gm.updateUnReadLstFromGmail();
+
+    }
+
+    public void initialImap(){
+        String user = inmindSharedPreferences.getString(Constants.USERNAME_FLAG,"");
+        String pwd = inmindSharedPreferences.getString(Constants.PWD_FLAG,"");
+        String host = inmindSharedPreferences.getString(Constants.HOST_FLAG,"");
+        imap = new IMAPManager(user,pwd,host);
     }
 
     public void startGMail(View view){
@@ -173,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
         //gm.updateLabelLstFromGmail();
         //if()
         //gm.updateUnReadLstFromGmail();
-        IMAPManager imap = new IMAPManager();
+        //IMAPManager imap = new IMAPManager();
         imap.checkInBox();
     }
 
@@ -212,6 +238,20 @@ public class MainActivity extends AppCompatActivity {
                     gm.chooseAccount();
                 }
                 break;
+            case Constants.RECEIVE_IMAP_LOGIN:
+                if (resultCode == RESULT_OK && data != null &&
+                        data.getExtras() != null) {
+                    SharedPreferences.Editor editor = inmindSharedPreferences.edit();
+                    editor.putBoolean(Constants.LOGINED_FLAG, true);
+                    editor.putString(Constants.USERNAME_FLAG, data.getStringExtra(Constants.USERNAME_FLAG));
+                    editor.putString(Constants.PWD_FLAG,data.getStringExtra(Constants.PWD_FLAG));
+                    editor.putString(Constants.HOST_FLAG,data.getStringExtra(Constants.HOST_FLAG));
+                    editor.apply();
+
+                    //initialize
+                    initialImap();
+                }
+
         }
 
         super.onActivityResult(requestCode, resultCode, data);

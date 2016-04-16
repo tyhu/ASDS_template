@@ -1,5 +1,6 @@
 package com.example.asds_template;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +17,7 @@ import javax.mail.Multipart;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.search.FlagTerm;
+import javax.mail.search.SearchTerm;
 
 /**
  * Created by TingYao on 4/11/2016.
@@ -32,11 +34,14 @@ public class IMAPManager {
     private boolean auth;
     private boolean debuggable;
 
-    public IMAPManager (){
-        host = "imap.srv.cs.cmu.edu";
-        user = "tingyaoh";
-        passwd = "for2scs3email";
-
+    public IMAPManager (String user,String passwd,String host){
+        this.host = host;
+        this.user = user;
+        this.passwd = passwd;
+        System.out.println("Imap manager initialized!!");
+        //host = "imap.srv.cs.cmu.edu";
+        //user = "tingyaoh";
+        //passwd = "for2scs3email";
     }
 
     public void checkInBox(){
@@ -51,6 +56,7 @@ public class IMAPManager {
             FlagTerm ft = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
             messages = Arrays.asList(inbox.search(ft));
             System.out.println("num of msg: "+messages.size());
+
             /*
             Message msg = inbox.getMessage(inbox.getMessageCount());
             Address[] in = msg.getFrom();
@@ -67,6 +73,10 @@ public class IMAPManager {
         }
     }
 
+    public void removeMsgLocal(int order){
+        messages.remove(order);
+    }
+
     public int getUnReadNum(){
         return messages.size();
     }
@@ -75,5 +85,80 @@ public class IMAPManager {
         Message msg = messages.get(order);
 
         return msg;
+    }
+
+    public void searchContent(String query){
+        Properties props = new Properties();
+        props.setProperty("mail.store.protocol", "imaps");
+        try {
+            Session session = Session.getInstance(props, null);
+            Store store = session.getStore();
+            store.connect(host, user, passwd);
+            Folder inbox = store.getFolder("INBOX");
+            inbox.open(Folder.READ_ONLY);
+
+            ContentSearchTerm cst = new ContentSearchTerm(query);
+            messages.clear();
+            messages = Arrays.asList(inbox.search(cst));
+
+        } catch (Exception mex) {
+            mex.printStackTrace();
+        }
+    }
+
+    /**
+     * Search term in email content
+     */
+    public class ContentSearchTerm extends SearchTerm {
+        private String content;
+
+        public ContentSearchTerm(String content) {
+            this.content = content;
+        }
+
+        @Override
+        public boolean match(Message message) {
+            try {
+                String contentType = message.getContentType().toLowerCase();
+                if (contentType.contains("text/plain")
+                        || contentType.contains("text/html")) {
+                    String messageContent = message.getContent().toString();
+                    if (messageContent.contains(content)) {
+                        return true;
+                    }
+                }
+            } catch (MessagingException ex) {
+                ex.printStackTrace();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            return false;
+        }
+
+    }
+
+    public class FromFieldSearchTerm extends SearchTerm {
+        private String fromEmail;
+
+        public FromFieldSearchTerm(String fromEmail) {
+            this.fromEmail = fromEmail;
+        }
+
+        @Override
+        public boolean match(Message message) {
+            try {
+                Address[] fromAddress = message.getFrom();
+                if (fromAddress != null && fromAddress.length > 0) {
+                    if (fromAddress[0].toString().contains(fromEmail)) {
+                        return true;
+                    }
+                }
+            } catch (MessagingException ex) {
+                ex.printStackTrace();
+            }
+
+            return false;
+        }
+
     }
 }
