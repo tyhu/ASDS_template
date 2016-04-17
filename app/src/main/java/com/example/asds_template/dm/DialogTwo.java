@@ -30,13 +30,19 @@ public class DialogTwo {
         gmr = new gmailResponse();
     }
 
+    public void setImap(IMAPManager imap){
+        this.imap = imap;
+    }
+
     public void inputNLUState(NLU.NLUState nluState){
         int intentIdx = nluState.getIntent();
         state.setCurrentIntent(dialogIntent.get(intentIdx));
         //update state
         //take action
         if(state.getCurrentIntent().equals("check")) {
+            //imap.printInfo();
             imap.checkInBox();
+            System.out.println("check in box!!!"+imap.getUnReadNum());
             nlg.InformUnread(imap.getUnReadNum());
             state.setLastAction("check");
         }
@@ -49,13 +55,15 @@ public class DialogTwo {
                 state.setFocusMsg(imap.getMsg(nluState.getOrder()));
                 Message msg = state.getFocusMsg();
                 try {
-                    Multipart mp = (Multipart) msg.getContent();
-                    BodyPart bp = mp.getBodyPart(0);
+                    BodyPart bp = ((Multipart) msg.getContent()).getBodyPart(0);
                     String content = bp.getContent().toString();
                     String sender = msg.getFrom()[0].toString();
-                    nlg.InformEmail(sender,content);
+                    //String sender = imap.parseSender(msg.getFrom()[0].toString());
+                    System.out.println(content);
+                    nlg.InformEmail(sender, content);
                     msg.setFlag(Flags.Flag.SEEN, true);
-                    imap.removeMsgLocal(nluState.getOrder());
+
+                    //imap.removeMsgLocal(nluState.getOrder());
                 } catch (Exception mex) {
                     mex.printStackTrace();
                 }
@@ -73,10 +81,9 @@ public class DialogTwo {
             System.out.println("last action: "+state.getLastAction());
             if(state.getLastAction().equals("read")){
                 Message msg = state.getFocusMsg();
+
                 try {
-                    Multipart mp = (Multipart) msg.getContent();
-                    BodyPart bp = mp.getBodyPart(0);
-                    nlg.speakRaw(bp.getContent().toString());
+                    nlg.speakRaw(msg.getContent().toString());
                 } catch (Exception mex) {
                     mex.printStackTrace();
                 }

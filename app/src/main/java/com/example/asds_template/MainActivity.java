@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else if (msg.arg1==Constants.ASR_TIME_OUT){
                     commandListener.StopSearch();
-                    gm.updateUnReadLstFromGmail();
+                    //gm.updateUnReadLstFromGmail();
                     textView.setText("IN MIND AGENT");
                     commandListener.Search("cmd_start", 20000);
                 }
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         //bingRecognizer = new BingRecognizer("dmeexdia","wNUXY7NvpIw1ugB4zVcUPhVQS6Lv9MFNPWa6qWIkIFY=");
         commandListener = new CommandListener(context, commandHandler);
         SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
-        gm = new GmailManager(this.context,settings,this);
+        //gm = new GmailManager(this.context,settings,this);
         List<String> dialogIntent = new ArrayList<String>();
         dialogIntent.add("read");
         dialogIntent.add("summarize");
@@ -135,22 +135,6 @@ public class MainActivity extends AppCompatActivity {
         dialogIntent.add("search");
         nlu = new NLU(dialogIntent);
         nlg = new NLG(context,commandHandler);
-
-        //=====imap log in
-        inmindSharedPreferences = getSharedPreferences(Constants.PREFERENCE_NAME, Activity.MODE_PRIVATE);
-
-        //startActivity(imapLogin);
-        if(!inmindSharedPreferences.contains(Constants.LOGINED_FLAG)) {
-            Intent imapLogin = new Intent().setClass(this.context,ImapLoginActivity.class);
-            startActivityForResult(imapLogin,Constants.RECEIVE_IMAP_LOGIN);
-        }
-        else
-            System.out.println("Hey! login info existed!!!!");
-        initialImap();
-        //=====end of imap log in
-
-        dm = new DialogTwo(imap,nlg,dialogIntent);
-
 
         voiceCMD.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -184,12 +168,29 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //=====imap log in
+        inmindSharedPreferences = getSharedPreferences(Constants.PREFERENCE_NAME, Activity.MODE_PRIVATE);
+
+        //startActivity(imapLogin);
+        if(!inmindSharedPreferences.contains(Constants.LOGINED_FLAG)) {
+            Intent imapLogin = new Intent().setClass(this.context,ImapLoginActivity.class);
+            startActivityForResult(imapLogin,Constants.RECEIVE_IMAP_LOGIN);
+        }
+        else
+            System.out.println("Hey! login info existed!!!!");
+        initialImap();
+        //=====end of imap log in
+
+        dm = new DialogTwo(imap,nlg,dialogIntent);
     }
 
     public void initialImap(){
         String user = inmindSharedPreferences.getString(Constants.USERNAME_FLAG,"");
         String pwd = inmindSharedPreferences.getString(Constants.PWD_FLAG,"");
         String host = inmindSharedPreferences.getString(Constants.HOST_FLAG,"");
+        System.out.println("user: "+user);
+        System.out.println("pwd: "+pwd);
+        System.out.println("host: "+host);
         imap = new IMAPManager(user,pwd,host);
     }
 
@@ -250,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
 
                     //initialize
                     initialImap();
+                    dm.setImap(imap);
                 }
 
         }

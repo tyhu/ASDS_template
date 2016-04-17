@@ -24,7 +24,6 @@ import javax.mail.search.SearchTerm;
  */
 public class IMAPManager {
     private String host;
-    private String port;
     private String user;
     private String passwd;
 
@@ -52,7 +51,7 @@ public class IMAPManager {
             Store store = session.getStore();
             store.connect(host, user, passwd);
             Folder inbox = store.getFolder("INBOX");
-            inbox.open(Folder.READ_ONLY);
+            inbox.open(Folder.READ_WRITE);
             FlagTerm ft = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
             messages = Arrays.asList(inbox.search(ft));
             System.out.println("num of msg: "+messages.size());
@@ -74,7 +73,9 @@ public class IMAPManager {
     }
 
     public void removeMsgLocal(int order){
-        messages.remove(order);
+        System.out.println("remove MstLocal");
+        messages.remove(reverseOrder(order));
+        System.out.println("num of msg now: "+messages.size());
     }
 
     public int getUnReadNum(){
@@ -82,9 +83,18 @@ public class IMAPManager {
     }
 
     public Message getMsg(int order){
-        Message msg = messages.get(order);
-
+        Message msg = messages.get(reverseOrder(order));
         return msg;
+    }
+
+    public int reverseOrder(int order){ return messages.size()-1-order; }
+
+    public void printInfo(){
+        System.out.println("IMAPManager: ");
+        System.out.println("username: "+user);
+        System.out.println("pwd: "+passwd);
+        System.out.println("hostname: "+host);
+
     }
 
     public void searchContent(String query){
@@ -95,7 +105,7 @@ public class IMAPManager {
             Store store = session.getStore();
             store.connect(host, user, passwd);
             Folder inbox = store.getFolder("INBOX");
-            inbox.open(Folder.READ_ONLY);
+            inbox.open(Folder.READ_WRITE);
 
             ContentSearchTerm cst = new ContentSearchTerm(query);
             messages.clear();
