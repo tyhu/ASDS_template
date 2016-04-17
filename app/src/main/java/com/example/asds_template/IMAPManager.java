@@ -76,7 +76,6 @@ public class IMAPManager {
     }
 
     public String parseSender(String raw){
-        System.out.println("raw address: "+raw);
         return raw.split("<")[0];
     }
 
@@ -120,11 +119,6 @@ public class IMAPManager {
         }
     }
 
-    public void removeMsgLocal(int order){
-        System.out.println("remove MstLocal");
-        messages.remove(reverseOrder(order));
-        System.out.println("num of msg now: "+messages.size());
-    }
 
     public int getUnReadNum(){
         return messages.size();
