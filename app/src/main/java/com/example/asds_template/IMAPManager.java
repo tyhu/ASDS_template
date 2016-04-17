@@ -30,8 +30,8 @@ public class IMAPManager {
     List<Message> messages;
     Message current_msg;
 
-    private boolean auth;
-    private boolean debuggable;
+    Properties props;
+    Folder inbox;
 
     public IMAPManager (String user,String passwd,String host){
         this.host = host;
@@ -41,11 +41,55 @@ public class IMAPManager {
         //host = "imap.srv.cs.cmu.edu";
         //user = "tingyaoh";
         //passwd = "for2scs3email";
+        props = new Properties();
+        props.setProperty("mail.store.protocol", "imaps");
+        messages = new ArrayList<Message>();
     }
 
     public void checkInBox(){
-        Properties props = new Properties();
-        props.setProperty("mail.store.protocol", "imaps");
+        try {
+            Session session = Session.getInstance(props, null);
+            Store store = session.getStore();
+            store.connect(host, user, passwd);
+            closeInbox();
+            inbox = store.getFolder("INBOX");
+
+            inbox.open(Folder.READ_WRITE);
+            FlagTerm ft = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
+            messages = Arrays.asList(inbox.search(ft));
+            System.out.println("num of msg: "+messages.size());
+
+            /*
+            Message msg = inbox.getMessage(inbox.getMessageCount());
+            Address[] in = msg.getFrom();
+            for (Address address : in) {
+                System.out.println("FROM:" + address.toString());
+            }
+            Multipart mp = (Multipart) msg.getContent();
+            BodyPart bp = mp.getBodyPart(0);
+            System.out.println("SENT DATE:" + msg.getSentDate());
+            System.out.println("SUBJECT:" + msg.getSubject());
+            System.out.println("CONTENT:" + bp.getContent());*/
+        } catch (Exception mex) {
+            mex.printStackTrace();
+        }
+    }
+
+    public String parseSender(String raw){
+        System.out.println("raw address: "+raw);
+        return raw.split("<")[0];
+    }
+
+    public void closeInbox(){
+        try {
+            if(inbox!=null&&inbox.isOpen())
+                inbox.close(true);
+        } catch (Exception mex) {
+            mex.printStackTrace();
+        }
+    }
+
+    public void markAllRead(){
         try {
             Session session = Session.getInstance(props, null);
             Store store = session.getStore();
@@ -54,7 +98,11 @@ public class IMAPManager {
             inbox.open(Folder.READ_WRITE);
             FlagTerm ft = new FlagTerm(new Flags(Flags.Flag.SEEN), false);
             messages = Arrays.asList(inbox.search(ft));
-            System.out.println("num of msg: "+messages.size());
+            System.out.println("num of msg: " + messages.size());
+            Message [] msgArr = new Message[messages.size()];
+            messages.toArray(msgArr);
+            inbox.setFlags(msgArr, new Flags(Flags.Flag.SEEN), true);
+            inbox.close(true);
 
             /*
             Message msg = inbox.getMessage(inbox.getMessageCount());
@@ -98,17 +146,15 @@ public class IMAPManager {
     }
 
     public void searchContent(String query){
-        Properties props = new Properties();
-        props.setProperty("mail.store.protocol", "imaps");
         try {
             Session session = Session.getInstance(props, null);
             Store store = session.getStore();
             store.connect(host, user, passwd);
+            closeInbox();
             Folder inbox = store.getFolder("INBOX");
             inbox.open(Folder.READ_WRITE);
 
             ContentSearchTerm cst = new ContentSearchTerm(query);
-            messages.clear();
             messages = Arrays.asList(inbox.search(cst));
 
         } catch (Exception mex) {
@@ -133,6 +179,7 @@ public class IMAPManager {
                 if (contentType.contains("text/plain")
                         || contentType.contains("text/html")) {
                     String messageContent = message.getContent().toString();
+                    //if (messageContent.contains(content)&&!message.isSet(Flags.Flag.SEEN)) {
                     if (messageContent.contains(content)) {
                         return true;
                     }
@@ -159,7 +206,7 @@ public class IMAPManager {
             try {
                 Address[] fromAddress = message.getFrom();
                 if (fromAddress != null && fromAddress.length > 0) {
-                    if (fromAddress[0].toString().contains(fromEmail)) {
+                    if (fromAddress[0].toString().contains(fromEmail)&&!message.isSet(Flags.Flag.SEEN)) {
                         return true;
                     }
                 }

@@ -57,24 +57,21 @@ public class DialogTwo {
                 try {
                     BodyPart bp = ((Multipart) msg.getContent()).getBodyPart(0);
                     String content = bp.getContent().toString();
-                    String sender = msg.getFrom()[0].toString();
-                    //String sender = imap.parseSender(msg.getFrom()[0].toString());
+                    //String sender = msg.getFrom()[0].toString();
+                    String contentType = msg.getContentType().toLowerCase();
+                    System.out.println("contenttype: "+contentType);
+
+                    String sender = imap.parseSender(msg.getFrom()[0].toString());
                     System.out.println(content);
                     nlg.InformEmail(sender, content);
                     msg.setFlag(Flags.Flag.SEEN, true);
-
+                    imap.checkInBox();
+                    state.setLastAction("read");
                     //imap.removeMsgLocal(nluState.getOrder());
                 } catch (Exception mex) {
                     mex.printStackTrace();
                 }
-                /*
-                gm.markAsRead(msg.getId());
-                //System.out.println("snippet: "+msg.getSnippet());
-                String snippet = msg.getSnippet();
-                String sender = gm.getSender(nluState.getOrder());
-                nlg.InformEmail(sender,snippet);
-                state.setLastAction("read");
-                */
+
             }
         }
         else if(state.getCurrentIntent().equals("repeat")){

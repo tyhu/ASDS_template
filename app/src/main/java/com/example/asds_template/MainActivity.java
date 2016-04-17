@@ -78,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
                 else if (msg.arg1==Constants.ASR_TIME_OUT){
                     commandListener.StopSearch();
                     //gm.updateUnReadLstFromGmail();
+
                     textView.setText("IN MIND AGENT");
                     commandListener.Search("cmd_start", 20000);
                 }
@@ -152,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 commandListener.StopSearch();
                 textView.setText("STOP");
+                imap.closeInbox();
             }
         });
 
@@ -201,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
         //if()
         //gm.updateUnReadLstFromGmail();
         //IMAPManager imap = new IMAPManager();
-        imap.checkInBox();
+        imap.markAllRead();
     }
 
     @Override
