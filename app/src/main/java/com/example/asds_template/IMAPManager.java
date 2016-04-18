@@ -75,6 +75,23 @@ public class IMAPManager {
         }
     }
 
+    public String parseContent(Message msg){
+        String out = "um, something i don't understand";
+        try {
+            String contentType = msg.getContentType().toLowerCase();
+            if(contentType.contains("text/plain")|| contentType.contains("text/html"))
+                out = msg.getContent().toString();
+            else if(contentType.contains("multipart/alternative")){
+                BodyPart bp = ((Multipart) msg.getContent()).getBodyPart(0);
+                out = bp.getContent().toString();
+            }
+
+        } catch (Exception mex) {
+            mex.printStackTrace();
+        }
+        return out;
+    }
+
     public String parseSender(String raw){
         return raw.split("<")[0];
     }
@@ -168,7 +185,14 @@ public class IMAPManager {
 
         @Override
         public boolean match(Message message) {
+
+            String messageContent = parseContent(message);
+            if (messageContent.contains(content)) {
+                return true;
+            }
+            /*
             try {
+
                 String contentType = message.getContentType().toLowerCase();
                 if (contentType.contains("text/plain")
                         || contentType.contains("text/html")) {
@@ -178,11 +202,14 @@ public class IMAPManager {
                         return true;
                     }
                 }
+                else if(contentType.contains("multiparty")){
+
+                }
             } catch (MessagingException ex) {
                 ex.printStackTrace();
             } catch (IOException ex) {
                 ex.printStackTrace();
-            }
+            }*/
             return false;
         }
 

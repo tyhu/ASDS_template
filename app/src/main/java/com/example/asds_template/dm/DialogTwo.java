@@ -55,11 +55,7 @@ public class DialogTwo {
                 state.setFocusMsg(imap.getMsg(nluState.getOrder()));
                 Message msg = state.getFocusMsg();
                 try {
-                    BodyPart bp = ((Multipart) msg.getContent()).getBodyPart(0);
-                    String content = bp.getContent().toString();
-                    //String sender = msg.getFrom()[0].toString();
-                    String contentType = msg.getContentType().toLowerCase();
-                    System.out.println("contenttype: "+contentType);
+                    String content = imap.parseContent(msg);
 
                     String sender = imap.parseSender(msg.getFrom()[0].toString());
                     System.out.println(content);
@@ -80,7 +76,7 @@ public class DialogTwo {
                 Message msg = state.getFocusMsg();
 
                 try {
-                    nlg.speakRaw(msg.getContent().toString());
+                    nlg.speakRaw(imap.parseContent(msg));
                 } catch (Exception mex) {
                     mex.printStackTrace();
                 }
