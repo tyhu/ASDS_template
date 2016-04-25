@@ -354,6 +354,18 @@ public class MultipleRecognizer {
                 out = new FileOutputStream("/sdcard/yahoo_test/"+audiofn);
                 System.out.println("wav file name: "+audiofn);
 
+                //***********end turn detection preparation
+                //***********but it's for distraction detection...
+                float energy;
+                float maxEnergy = 0;
+                float minEnergy = (float)1E12;
+                int postCount = 0;
+                int postThres = 6;
+                int preCount = 0;
+                int preThres = 10;
+                boolean endTurn = false;
+                boolean noTurn = false;
+
                 recorder.startRecording();
                 if(recorder.getRecordingState() == 1) {
                     recorder.stop();
@@ -367,7 +379,7 @@ public class MultipleRecognizer {
                     boolean inSpeech = decoder.getInSpeech();
                     recorder.read(buffer, 0, buffer.length);
 
-                    while(!interrupted() && (this.timeoutSamples == -1 || this.remainingSamples > 0)) {
+                    while(!interrupted() && (this.timeoutSamples == -1 || this.remainingSamples > 0) && !endTurn) {
                         int nread = recorder.read(buffer, 0, buffer.length);
                         if(-1 == nread) {
                             throw new RuntimeException("error reading audio buffer");
@@ -391,12 +403,37 @@ public class MultipleRecognizer {
                             mainHandler.post(new ResultEvent(hypothesis, false));
                         }
 
+
+                        //**********end turn detection
+                        //***********but it's for distraction detection...
+                        energy = bufferEnergy(buffer);
+                        if(energy>maxEnergy) maxEnergy = energy;
+                        if(energy<minEnergy) minEnergy = energy;
+
+                        if(energy<maxEnergy*0.01) postCount+=1;
+                        else postCount=0;
+                        if(maxEnergy<minEnergy*10) preCount+=1;
+
+                        if(postCount>postThres) endTurn = true;
+                        if(preCount>preThres) noTurn = true;
+
+                        System.out.println("energy: "+energy);
+                        System.out.println("postCount: "+postCount);
+                        //*****end of end turn detection
+                        //***********but it's for distraction detection...
+
+
                         if(this.timeoutSamples != -1) {
                             this.remainingSamples -= nread;
                         }
                     }
                     recorder.stop();
                     decoder.endUtt();
+                    if(endTurn) {
+                        System.out.println("you are distracted!!!!");
+                        Hypothesis hypothesis = new Hypothesis("distracted!",0,0);
+                        mainHandler.post(new ResultEvent(hypothesis, false));
+                    }
                     mainHandler.removeCallbacksAndMessages((Object)null);
                     if(this.timeoutSamples != -1 && this.remainingSamples <= 0) {
                         mainHandler.post(new TimeoutEvent());

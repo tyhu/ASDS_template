@@ -155,6 +155,12 @@ public class MainActivity extends AppCompatActivity {
                     nlg.speakRaw("your email has been sent");
                     //commandListener.Search("KW1", 20000);
                 }
+                else if (msg.arg1== Constants.ASR_DISTRACTION){
+                    nexttag = 2;
+                    nlg.speakRaw("You are distracted, system shutting down");
+                    textView.setText("STOP");
+                    //commandListener.Search("KW1", 20000);
+                }
                 else if (msg.arg1== Constants.ASR_REPEAT){
                     nexttag = 0;
                     if (emailIdx>emails.size()-1){

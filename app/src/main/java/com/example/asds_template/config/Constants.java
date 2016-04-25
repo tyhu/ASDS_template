@@ -13,6 +13,7 @@ public class Constants {
     public static final int ASR_REPLY_EMAIL = 5;
     public static final int ASR_TERMINATE = 6;
     public static final int ASR_REPEAT = 7;
+    public static final int ASR_DISTRACTION = 8;
 
     public static final int REQUEST_ACCOUNT_PICKER = 1000;
     public static final int REQUEST_AUTHORIZATION = 1001;

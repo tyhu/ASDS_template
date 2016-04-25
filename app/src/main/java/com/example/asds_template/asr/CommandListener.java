@@ -198,6 +198,13 @@ public class CommandListener implements RecognitionListener  {
                 recognizer.stop();
                 commandHandler.sendMessage(msg);
             }
+            else if(cmd.contains("distracted!")){
+                Message msg = new Message();
+                System.out.println("you are distracted2!!!!");
+                msg.arg1 = Constants.ASR_DISTRACTION;
+                recognizer.stop();
+                commandHandler.sendMessage(msg);
+            }
             else if(cmd.contains("terminate")){
                 Message msg = new Message();
                 msg.arg1 = Constants.ASR_TERMINATE;
