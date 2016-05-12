@@ -348,7 +348,8 @@ public class MultipleRecognizer {
             calendar = Calendar.getInstance();
             FileOutputStream out = null;
             String audiofn = df1.format(calendar.getTime());
-            audiofn = audiofn.replace(" ","_")+".raw";
+            audiofn = audiofn.replace(" ","_");
+            audiofn = audiofn.replace(":","_")+".raw";
 
             try {
                 out = new FileOutputStream("/sdcard/yahoo_test/"+audiofn);
@@ -379,7 +380,8 @@ public class MultipleRecognizer {
                     boolean inSpeech = decoder.getInSpeech();
                     recorder.read(buffer, 0, buffer.length);
 
-                    while(!interrupted() && (this.timeoutSamples == -1 || this.remainingSamples > 0) && !endTurn) {
+                    //while(!interrupted() && (this.timeoutSamples == -1 || this.remainingSamples > 0) && !endTurn) {
+                    while(!interrupted() && (this.timeoutSamples == -1 || this.remainingSamples > 0)) {
                         int nread = recorder.read(buffer, 0, buffer.length);
                         if(-1 == nread) {
                             throw new RuntimeException("error reading audio buffer");
@@ -429,11 +431,11 @@ public class MultipleRecognizer {
                     }
                     recorder.stop();
                     decoder.endUtt();
-                    if(endTurn) {
+                    /*if(endTurn) {
                         System.out.println("you are distracted!!!!");
                         Hypothesis hypothesis = new Hypothesis("distracted!",0,0);
                         mainHandler.post(new ResultEvent(hypothesis, false));
-                    }
+                    }*/
                     mainHandler.removeCallbacksAndMessages((Object)null);
                     if(this.timeoutSamples != -1 && this.remainingSamples <= 0) {
                         mainHandler.post(new TimeoutEvent());

@@ -33,10 +33,19 @@ public class MainActivity extends AppCompatActivity {
     public Handler commandHandler;
     Context context;
 
+    String instruction = "You can speak the following commands:\n" +
+            "1. [NEXT EMAIL]: Read next email in the inbox \n" +
+            "2. [REPEAT THAT]: Repeat the current email\n" +
+            "3. [REPLY EMAIL]: Reply the current email\n" +
+            "4. [TERMINATE]: terminate your reply and send the email";
+    String instruction2 = "Were you distracted? If yes, press start to continue. If not press \"I'm NOT DISTRACTED!\" and continue";
+
     TextView textView;
+    TextView instructText;
     Button stopButton;
     Button voiceCMD;
     Button asrButton;
+    Button denyButton;
 
     GmailManager gm;
     NLU nlu;
@@ -55,8 +64,12 @@ public class MainActivity extends AppCompatActivity {
         voiceCMD = (Button) findViewById(R.id.voiceCmd);
         stopButton = (Button) findViewById(R.id.stop_button);
         asrButton = (Button) findViewById(R.id.bingASRButton);
+        denyButton = (Button) findViewById(R.id.deny_button);
+        denyButton.setVisibility(View.GONE);
         //gmailButton = (Button) findViewById(R.id.gmail_button);
         textView = (TextView) findViewById(R.id.textView);
+        instructText = (TextView) findViewById(R.id.instructText);
+        instructText.setText(instruction);
         setTitle("InMind Agent Template (for experiment)");
         //allow main thread execute network operation
         if (android.os.Build.VERSION.SDK_INT > 9) {
@@ -122,6 +135,11 @@ public class MainActivity extends AppCompatActivity {
                     else if (nexttag==0){
                         commandListener.SuperSearch("KW1", 20000);
                     }
+                    else if (nexttag==2){
+                        textView.setText("STOP");
+                        denyButton.setVisibility(View.VISIBLE);
+                        instructText.setText(instruction2);
+                    }
                     //commandListener.SuperSearch("KW1", 5000);
                     //textView.setText("Listening...");
                     /*
@@ -148,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
                 else if (msg.arg1==Constants.ASR_REPLY_EMAIL){
                     nexttag = 1;
                     nlg.speakRaw("say terminate when you finish, you can start to speak now");
-
+                    textView.setText("Replying...");
                 }
                 else if (msg.arg1== Constants.ASR_TERMINATE){
                     nexttag = 0;
@@ -190,6 +208,14 @@ public class MainActivity extends AppCompatActivity {
         nlg = new NLG(context,commandHandler);
         dm = new DialogOne(gm,nlg,dialogIntent);
 
+        denyButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                commandListener.SuperSearch("KW1", 20000);
+                textView.setText("Listening...");
+                instructText.setText(instruction);
+                denyButton.setVisibility(View.GONE);
+            }
+        });
 
         voiceCMD.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -198,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
                 //textView.setText("IN MIND AGENT");
                 commandListener.SuperSearch("KW1", 20000);
                 textView.setText("Listening...");
+                instructText.setText(instruction);
                 //commandListener.SuperSearch("cmd1", 4000);
                 //textView.setText("Listening...");
                 //commandListener.Search("cmd_start", -1);
@@ -228,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
         //gm.updateUnReadLstFromGmail();
     }
 
-    public void startGMail(View view){
+    public void startGMail(View view) {
         //Intent intent = new Intent(this, GmailActivity.class);
         //startActivity(intent);
         //gm.updateLabelLstFromGmail();
@@ -240,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode) {
+        switch (requestCode) {
             case Constants.REQUEST_GOOGLE_PLAY_SERVICES:
                 if (resultCode != RESULT_OK) {
                     gm.isGooglePlayServicesAvailable();

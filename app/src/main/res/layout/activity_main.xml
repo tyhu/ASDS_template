@@ -19,7 +19,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="VOICE CMD"
+        android:text="Start"
         android:id="@+id/voiceCmd"
         android:layout_alignParentBottom="true" />
 
@@ -46,7 +46,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Gmail"
+        android:text="reset"
         android:id="@+id/gmail_button"
         android:layout_alignTop="@+id/stop_button"
         android:layout_alignParentRight="true"
@@ -54,5 +54,26 @@
         android:layout_alignLeft="@+id/bingASRButton"
         android:layout_alignStart="@+id/bingASRButton"
         android:onClick="startGMail" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="I&apos;m NOT distracted!"
+        android:id="@+id/deny_button"
+        android:layout_above="@+id/gmail_button"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignLeft="@+id/gmail_button"
+        android:layout_alignStart="@+id/gmail_button" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Texti"
+        android:id="@+id/instructText"
+        android:layout_below="@+id/textView"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="41dp" />
 
 </RelativeLayout>
