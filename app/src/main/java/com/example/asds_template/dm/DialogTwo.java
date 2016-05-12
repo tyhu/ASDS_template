@@ -60,8 +60,15 @@ public class DialogTwo {
                     String sender = imap.parseSender(msg.getFrom()[0].toString());
                     System.out.println(content);
                     nlg.InformEmail(sender, content);
+                    state.currentMailContent = content;
                     msg.setFlag(Flags.Flag.SEEN, true);
-                    imap.checkInBox();
+                    if (state.isOnSearch()){
+                        imap.searchContent(state.currentQuery);
+                        //nlg.InformFound(imap.getUnReadNum());
+                        state.setLastAction("search");
+                    }
+                    else
+                        imap.checkInBox();
                     state.setLastAction("read");
                     //imap.removeMsgLocal(nluState.getOrder());
                 } catch (Exception mex) {
@@ -73,13 +80,15 @@ public class DialogTwo {
         else if(state.getCurrentIntent().equals("repeat")){
             System.out.println("last action: "+state.getLastAction());
             if(state.getLastAction().equals("read")){
+                /*
                 Message msg = state.getFocusMsg();
 
                 try {
                     nlg.speakRaw(imap.parseContent(msg));
                 } catch (Exception mex) {
                     mex.printStackTrace();
-                }
+                }*/
+                nlg.speakRaw(state.currentMailContent);
             } else if (state.getLastAction().equals("check")){
                 nlg.InformUnread(imap.getUnReadNum());
             }
@@ -89,6 +98,8 @@ public class DialogTwo {
             imap.searchContent(nluState.getQuery());
             nlg.InformFound(imap.getUnReadNum());
             state.setLastAction("search");
+            state.setOnSearch(true);
+            state.currentQuery = nluState.getQuery();
         }
     }
 
@@ -103,17 +114,23 @@ public class DialogTwo {
     public class dialogueState{
         String lastAction;
         String currentIntent;
+        String currentMailContent;
+        String currentQuery;
         Message focusMsg;
+        boolean onSearch;
 
         public dialogueState(){
             lastAction="none";
             currentIntent = "";
+            onSearch = false;
         }
 
         public String getLastAction() {return lastAction;}
         public Message getFocusMsg() { return focusMsg; }
-        public String getCurrentIntent() {return currentIntent; }
+        public String getCurrentIntent() {return currentIntent;}
+        public boolean isOnSearch() {return onSearch; }
 
+        public void setOnSearch(boolean b) { this.onSearch = b;}
         public void setLastAction(String lastAction) {
             this.lastAction = lastAction;
         }
