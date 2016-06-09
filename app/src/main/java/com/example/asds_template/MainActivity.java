@@ -17,7 +17,11 @@ import com.example.asds_template.asr.CommandListener;
 import com.example.asds_template.dm.DialogOne;
 import com.example.asds_template.nlg.NLG;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import com.example.asds_template.config.Constants;
 import com.example.asds_template.nlu.NLU;
@@ -56,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
     int nexttag = 0;
     int emailIdx = -1;
     ArrayList<String> emails;
+    Calendar calendar;
+    SimpleDateFormat df1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -251,7 +257,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         asrButton.setEnabled(false);
-
+        calendar = Calendar.getInstance();
+        df1 = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss a");
         //gm.updateUnReadLstFromGmail();
     }
 
@@ -261,6 +268,16 @@ public class MainActivity extends AppCompatActivity {
         //gm.updateLabelLstFromGmail();
         //if()
         emailIdx = -1;
+        FileWriter f;
+        try {
+            String audiofn = df1.format(calendar.getTime());
+            f = new FileWriter("/sdcard/log.txt",true);
+            f.write(audiofn+"\n");
+            f.flush();
+            f.close();
+        } catch(IOException e){
+            System.out.println("fail to open log file");
+        }
         //gm.updateUnReadLstFromGmail();
     }
 
