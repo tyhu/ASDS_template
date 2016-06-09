@@ -28,10 +28,10 @@ dependencies {
     compile('com.google.apis:google-api-services-gmail:v1-rev29-1.20.0') {
         exclude group: 'org.apache.httpcomponents'
     }
-
     compile 'com.android.support:appcompat-v7:23.2.0'
     compile 'com.google.android.gms:play-services-identity:7.8.0'
     compile 'com.android.support:design:23.2.0'
+    compile project(':openCVLibrary310')
 }
 ant.importBuild 'assets.xml'
 preBuild.dependsOn(list, checksum)

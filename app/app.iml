@@ -112,5 +112,6 @@
     <orderEntry type="library" exported="" name="google-http-client-android-1.20.0" level="project" />
     <orderEntry type="library" exported="" name="google-oauth-client-1.20.0" level="project" />
     <orderEntry type="library" exported="" name="activation" level="project" />
+    <orderEntry type="module" module-name="openCVLibrary310" exported="" />
   </component>
 </module>

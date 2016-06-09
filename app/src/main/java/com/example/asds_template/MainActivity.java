@@ -10,7 +10,11 @@ import android.os.Message;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MenuItem;
+import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -19,16 +23,32 @@ import com.example.asds_template.dm.DialogOne;
 import com.example.asds_template.dm.DialogTwo;
 import com.example.asds_template.nlg.NLG;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import com.example.asds_template.config.Constants;
 import com.example.asds_template.nlu.NLU;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfRect;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
+import org.opencv.objdetect.CascadeClassifier;
+import org.opencv.imgproc.Imgproc;
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity implements CvCameraViewListener2 {
 //public class MainActivity extends AppCompatActivity {
 
     public CommandListener commandListener;
@@ -48,6 +68,50 @@ public class MainActivity extends AppCompatActivity {
     DialogTwo dm;
 
     SharedPreferences  inmindSharedPreferences ;
+
+    //video part
+    private CameraBridgeViewBase   mOpenCvCameraView;
+    private static final String    TAG                 = "OCVSample::Activity";
+    /*
+    private static final Scalar    FACE_RECT_COLOR     = new Scalar(0, 255, 0, 255);
+    public static final int        JAVA_DETECTOR       = 0;
+    public static final int        NATIVE_DETECTOR     = 1;
+    private MenuItem               mItemFace50;
+    private MenuItem               mItemFace40;
+    private MenuItem               mItemFace30;
+    private MenuItem               mItemFace20;
+    private MenuItem               mItemType;
+
+    private Mat                    mRgba;
+    private Mat                    mGray;
+    private File mCascadeFile;
+    private CascadeClassifier      mJavaDetector;
+    private DetectionBasedTracker  mNativeDetector;
+
+    private int                    mDetectorType       = JAVA_DETECTOR;
+    private String[]               mDetectorName;
+
+    private float                  mRelativeFaceSize   = 0.2f;
+    private int                    mAbsoluteFaceSize   = 0;*/
+
+    private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
+        @Override
+        public void onManagerConnected(int status) {
+            switch (status) {
+                case LoaderCallbackInterface.SUCCESS:
+                {
+                    Log.i(TAG, "OpenCV loaded successfully");
+
+
+                    mOpenCvCameraView.enableView();
+                } break;
+                default:
+                {
+                    super.onManagerConnected(status);
+                } break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,6 +249,12 @@ public class MainActivity extends AppCompatActivity {
         //=====end of imap log in
 
         dm = new DialogTwo(imap,nlg,dialogIntent);
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.videoView);
+        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+        mOpenCvCameraView.setCvCameraViewListener(this);
+
     }
 
     public void initialImap(){
@@ -262,4 +332,20 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    public void onCameraViewStarted(int width, int height) {
+    }
+
+    public void onCameraViewStopped() {
+    }
+
+    public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
+        return inputFrame.rgba();
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_6, this, mLoaderCallback);
+    }
 }
