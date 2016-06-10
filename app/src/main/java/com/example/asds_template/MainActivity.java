@@ -17,6 +17,9 @@ import com.example.asds_template.asr.CommandListener;
 import com.example.asds_template.dm.DialogOne;
 import com.example.asds_template.nlg.NLG;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -37,13 +40,6 @@ public class MainActivity extends AppCompatActivity {
     public Handler commandHandler;
     Context context;
 
-    String instruction = "You can speak the following commands:\n" +
-            "1. [NEXT EMAIL]: Read next email in the inbox \n" +
-            "2. [REPEAT THAT]: Repeat the current email\n" +
-            "3. [REPLY EMAIL]: Reply the current email\n" +
-            "4. [TERMINATE]: terminate your reply and send the email";
-    String instruction2 = "Were you distracted? If yes, press start to continue. If not press \"I'm NOT DISTRACTED!\" and continue";
-
     TextView textView;
     TextView instructText;
     Button stopButton;
@@ -58,8 +54,9 @@ public class MainActivity extends AppCompatActivity {
 
     //for experiment
     int nexttag = 0;
-    int emailIdx = -1;
-    ArrayList<String> emails;
+    int nameIdx = -1;
+    ArrayList<String> templates;
+    ArrayList<String> namelist;
     Calendar calendar;
     SimpleDateFormat df1;
 
@@ -72,10 +69,10 @@ public class MainActivity extends AppCompatActivity {
         asrButton = (Button) findViewById(R.id.bingASRButton);
         denyButton = (Button) findViewById(R.id.deny_button);
         denyButton.setVisibility(View.GONE);
-        //gmailButton = (Button) findViewById(R.id.gmail_button);
+
         textView = (TextView) findViewById(R.id.textView);
         instructText = (TextView) findViewById(R.id.instructText);
-        instructText.setText(instruction);
+
         setTitle("InMind Agent Template (for experiment)");
         //allow main thread execute network operation
         if (android.os.Build.VERSION.SDK_INT > 9) {
@@ -83,118 +80,32 @@ public class MainActivity extends AppCompatActivity {
             StrictMode.setThreadPolicy(policy);
         }
 
-        //hard code each email
-        emails = new ArrayList<String>();
-        emails.add("mom said, how are you today?");
-        emails.add("Steve said, We're going to Spice Island for your birthday.  Does tonight at 7 work for you?");
-        emails.add("Tony said, Happy Birthday, Tell me 5 things that you would like, and I will surprise you with one at the party");
-        emails.add("Mom said, What did you have for dinner last night?");
-        emails.add("Justin said, Hey, I'm having friends over to watch some movies tonight on Netflix, can you suggest three?");
-        emails.add("From your professor, I have not received your assignment, why?");
+        //hard code each template
+        templates = new ArrayList<String>();
+        templates.add("");
+        templates.add("The speaker is ");
+        templates.add("When will be the talk by ");
+        templates.add("The talk is given by ");
+
+        //name list:
+        namelist = readNameList();
+        nameIdx = 0;
+        instructText.setText(namelist.get(nameIdx));
 
         commandHandler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
-                if (msg.arg1==Constants.KEYWD_DETECTED){
-                    //start keyword
-                    //commandListener.Search("cmd1",7000);
-                    nlg.speakRaw("Yes");
-                    //commandListener.SuperSearch("cmd1", 4000);
-                    textView.setText("Listening...");
-
-                }
-                else if (msg.arg1==Constants.ASR_TIME_OUT){
-                    textView.setText("STOP");
-                    //commandListener.StopSearch();
-                    //gm.updateUnReadLstFromGmail();
-                    //textView.setText("IN MIND AGENT");
-                    //commandListener.Search("cmd_start", 20000);
-                }
-                else if (msg.arg1==-1){
-
-                    //String asrOutput = (String)msg.obj;
-                    NLU.NLUState nluState = nlu.understanding((String)msg.obj);
-                    dm.inputNLUState(nluState);
-
-                    commandListener.StopSearch();
-                    commandListener.Search("cmd_start", -1);
-                    //nlg.speakRaw("you have no unread email");
-                    //DM
-                    //nlg
-                }
-                else if (msg.arg1==Constants.ASR_OUTPUT){
+                if (msg.arg1==Constants.ASR_OUTPUT){
                     //================== pipeline =====================
                     textView.setText((String) msg.obj);
-                    NLU.NLUState nluState = nlu.understanding((String)msg.obj);
-                    dm.inputNLUState(nluState);
+                    instructText.setText("try next: " + namelist.get(nameIdx));
 
                     //commandListener.StopSearch();
                     //commandListener.Search("cmd_start", -1);
                     //nlg.speakRaw("you have no unread email");
 
                 }
-                else if (msg.arg1==Constants.TTS_COMPLETE){
-                    textView.setText("Listening...");
-                    if (nexttag==1){
-                        commandListener.Search("cmd_final", -1);
-                    }
-                    else if (nexttag==0){
-                        commandListener.SuperSearch("KW1", 20000);
-                    }
-                    else if (nexttag==2){
-                        textView.setText("STOP");
-                        denyButton.setVisibility(View.VISIBLE);
-                        instructText.setText(instruction2);
-                    }
-                    //commandListener.SuperSearch("KW1", 5000);
-                    //textView.setText("Listening...");
-                    /*
-                    System.out.println("tts: "+(String)msg.obj);
-                    if(((String)msg.obj).equals("Yes"))
-                        commandListener.SuperSearch("cmd1", 7000);
-                    else{
-                        commandListener.StopSearch();
-                        commandListener.Search("cmd_start", -1);
-                    }
-                    */
-                }
-                else if (msg.arg1==Constants.ASR_NEXT_EMAIL){
-                    emailIdx+=1;
-                    nexttag = 0;
-                    if (emailIdx>emails.size()-1){
-                        nlg.speakRaw("there is no more email");
-                    }
-                    else{
-                        nlg.speakRaw(emails.get(emailIdx));
-                        //commandListener.SuperSearch("KW1", 20000);
-                    }
-                }
-                else if (msg.arg1==Constants.ASR_REPLY_EMAIL){
-                    nexttag = 1;
-                    nlg.speakRaw("say terminate when you finish, you can start to speak now");
-                    textView.setText("Replying...");
-                }
-                else if (msg.arg1== Constants.ASR_TERMINATE){
-                    nexttag = 0;
-                    nlg.speakRaw("your email has been sent");
-                    //commandListener.Search("KW1", 20000);
-                }
-                else if (msg.arg1== Constants.ASR_DISTRACTION){
-                    nexttag = 2;
-                    nlg.speakRaw("You are distracted, system shutting down");
-                    textView.setText("STOP");
-                    //commandListener.Search("KW1", 20000);
-                }
-                else if (msg.arg1== Constants.ASR_REPEAT){
-                    nexttag = 0;
-                    if (emailIdx>emails.size()-1){
-                        nlg.speakRaw("there is no more email");
-                    }
-                    else{
-                        nlg.speakRaw(emails.get(emailIdx));
-                        //commandListener.Search("KW1", 20000);
-                    }
-                }
+
                 return false;
             }
         });
@@ -216,9 +127,8 @@ public class MainActivity extends AppCompatActivity {
 
         denyButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                commandListener.SuperSearch("KW1", 20000);
+                //commandListener.SuperSearch("KW1", 20000);
                 textView.setText("Listening...");
-                instructText.setText(instruction);
                 denyButton.setVisibility(View.GONE);
             }
         });
@@ -228,12 +138,15 @@ public class MainActivity extends AppCompatActivity {
                 // Perform action on click
                 //commandListener.Search("cmd_start",-1);
                 //textView.setText("IN MIND AGENT");
-                commandListener.SuperSearch("KW1", 20000);
-                textView.setText("Listening...");
-                instructText.setText(instruction);
-                //commandListener.SuperSearch("cmd1", 4000);
-                //textView.setText("Listening...");
-                //commandListener.Search("cmd_start", -1);
+                if(nameIdx<namelist.size()){
+                    commandListener.StopSearch();
+                    commandListener.SuperSearch("KW1", 20000, String.valueOf(nameIdx)+".raw");
+                    nameIdx+=1;
+                    textView.setText("Listening...");
+
+                } else{
+                    instructText.setText("The end");
+                }
             }
         });
 
@@ -267,18 +180,8 @@ public class MainActivity extends AppCompatActivity {
         //startActivity(intent);
         //gm.updateLabelLstFromGmail();
         //if()
-        emailIdx = -1;
-        FileWriter f;
-        try {
-            String audiofn = df1.format(calendar.getTime());
-            f = new FileWriter("/sdcard/log.txt",true);
-            f.write(audiofn+"\n");
-            f.flush();
-            f.close();
-        } catch(IOException e){
-            System.out.println("fail to open log file");
-        }
-        //gm.updateUnReadLstFromGmail();
+        nameIdx = 0;
+        instructText.setText(namelist.get(nameIdx));
     }
 
     @Override
@@ -320,5 +223,22 @@ public class MainActivity extends AppCompatActivity {
 
         super.onActivityResult(requestCode, resultCode, data);
     }
+    public ArrayList<String> readNameList(){
+        File namefile = new File("/sdcard/unseen_speaker.txt");
+        ArrayList<String> names = new ArrayList<String>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(namefile));
+            String line;
 
+            while ((line = br.readLine()) != null) {
+                names.add(line);
+            }
+            br.close();
+        }
+        catch (IOException e) {
+            //You'll need to add proper error handling here
+            System.out.println("can not open unseen_speaker.txt");
+        }
+        return names;
+    }
 }

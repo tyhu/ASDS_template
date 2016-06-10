@@ -129,13 +129,13 @@ public class MultipleRecognizer {
         }
     }
 
-    public boolean startSuperListening(String searchName, int timeout) {
+    public boolean startSuperListening(String searchName, int timeout, String audiofn) {
         if(null != this.recognizerThread) {
             return false;
         } else {
             Log.i(TAG, String.format("Start recognition \"%s\"", new Object[]{searchName}));
             decoder.setSearch(searchName);
-            recognizerThread = new MultipleRecognizer.MultiRecognizerThread(timeout);
+            recognizerThread = new MultipleRecognizer.MultiRecognizerThread(timeout, audiofn);
             //detectionThread = new DetectionThread();
             recognizerThread.start();
             //detectionThread.start();
@@ -459,14 +459,16 @@ public class MultipleRecognizer {
         private int remainingSamples;
         private int timeoutSamples;
         private static final int NO_TIMEOUT = -1;
+        private String audiofn;
+        private FileOutputStream out;
 
-        public MultiRecognizerThread(int timeout) {
+        public MultiRecognizerThread(int timeout, String audiofn) {
             if(timeout != -1) {
                 this.timeoutSamples = timeout * sampleRate / 1000;
             } else {
                 this.timeoutSamples = -1;
             }
-
+            this.audiofn = audiofn;
             this.remainingSamples = this.timeoutSamples;
         }
 
@@ -477,6 +479,8 @@ public class MultipleRecognizer {
         public void run() {
             try{
 
+                out = new FileOutputStream("/sdcard/yahoo_test/"+audiofn);
+                System.out.println("wav file name: "+audiofn);
                 //connect to bing
                 URL asr_url = new URL(link+BingASRParams());
                 HttpURLConnection conn = (HttpURLConnection) asr_url.openConnection();
@@ -517,7 +521,8 @@ public class MultipleRecognizer {
                     boolean inSpeech = decoder.getInSpeech();
                     recorder.read(buffer, 0, buffer.length);
                     bytesbuf = short2byte(buffer,bufferSize);
-                    outputStream.write(bytesbuf);
+                    outputStream.write(bytesbuf); //to bing
+                    out.write(bytesbuf); //to raw file
                     System.out.println("time out: "+timeoutSamples);
                     while(!interrupted() && (this.timeoutSamples == -1 || this.remainingSamples > 0) && !noTurn && !endTurn) {
                         int nread = recorder.read(buffer, 0, buffer.length);
@@ -529,7 +534,7 @@ public class MultipleRecognizer {
                         }
 
                         if(nread > 0) {
-                            decoder.processRaw(buffer, (long)nread, false, false);
+                            decoder.processRaw(buffer, (long) nread, false, false);
                             if(decoder.getInSpeech() != inSpeech) {
                                 inSpeech = decoder.getInSpeech();
                                 mainHandler.post(new InSpeechChangeEvent(inSpeech));
@@ -611,6 +616,8 @@ public class MultipleRecognizer {
                     }catch (JSONException je){ Log.e("Bing",je.getMessage());}
 
                 }
+                out.flush();
+                out.close();
             } catch (IOException e){
                 Log.e("MultiRecognizerThread","connection error");
             }

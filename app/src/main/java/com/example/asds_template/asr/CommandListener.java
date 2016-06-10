@@ -151,10 +151,10 @@ public class CommandListener implements RecognitionListener  {
     }
 
 
-    public void SuperSearch(String type, int search_duration){
+    public void SuperSearch(String type, int search_duration, String filename){
         recognizer.stop();
         useBing = true;
-        recognizer.startSuperListening(type, search_duration);
+        recognizer.startSuperListening(type, search_duration, filename);
     }
 
     public void StopSearch(){
@@ -186,40 +186,13 @@ public class CommandListener implements RecognitionListener  {
         if(hypothesis != null){
             String cmd = hypothesis.getHypstr();
             System.out.println("recognition output: "+cmd);
-            if(cmd.contains("next email")){
+            if (cmd.contains("[bing]")){
                 Message msg = new Message();
-                msg.arg1 = Constants.ASR_NEXT_EMAIL;
-                recognizer.stop();
+                msg.arg1 = Constants.ASR_OUTPUT;
+                msg.obj = cmd;
                 commandHandler.sendMessage(msg);
-            }
-            else if (cmd.contains("reply email")){
-                Message msg = new Message();
-                msg.arg1 = Constants.ASR_REPLY_EMAIL;
                 recognizer.stop();
-                commandHandler.sendMessage(msg);
-            }
-            else if(cmd.contains("distracted!")){
-                Message msg = new Message();
-                System.out.println("you are distracted2!!!!");
-                msg.arg1 = Constants.ASR_DISTRACTION;
-                recognizer.stop();
-                commandHandler.sendMessage(msg);
-            }
-            else if(cmd.contains("terminate")){
-                Message msg = new Message();
-                msg.arg1 = Constants.ASR_TERMINATE;
-                recognizer.stop();
-                commandHandler.sendMessage(msg);
-            }
-            else if (cmd.contains("repeat that")){
-                Message msg = new Message();
-                msg.arg1 = Constants.ASR_REPEAT;
-                recognizer.stop();
-                commandHandler.sendMessage(msg);
-            }
-            else if (cmd.contains("[bing]")){
-                recognizer.stop();
-                recognizer.startSuperListening("KW1",8000);
+                //recognizer.startSuperListening("KW1",8000);
             }
             /*
             if (cmd.equals(START_KEY)){
