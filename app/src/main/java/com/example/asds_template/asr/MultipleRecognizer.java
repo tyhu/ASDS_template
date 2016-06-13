@@ -522,12 +522,12 @@ public class MultipleRecognizer {
                     recorder.read(buffer, 0, buffer.length);
                     bytesbuf = short2byte(buffer,bufferSize);
                     outputStream.write(bytesbuf); //to bing
-                    out.write(bytesbuf); //to raw file
                     System.out.println("time out: "+timeoutSamples);
                     while(!interrupted() && (this.timeoutSamples == -1 || this.remainingSamples > 0) && !noTurn && !endTurn) {
                         int nread = recorder.read(buffer, 0, buffer.length);
                         decoder.processRaw(buffer, (long)nread, false, false);
                         bytesbuf = short2byte(buffer,bufferSize);
+                        out.write(bytesbuf); //to raw file
                         outputStream.write(bytesbuf);
                         if(-1 == nread) {
                             throw new RuntimeException("error reading audio buffer");

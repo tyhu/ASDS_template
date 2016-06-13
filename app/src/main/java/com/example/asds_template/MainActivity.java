@@ -4,6 +4,9 @@ import android.accounts.AccountManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.os.Handler;
 import android.os.Message;
 import android.os.StrictMode;
@@ -19,6 +22,9 @@ import com.example.asds_template.nlg.NLG;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -97,7 +103,14 @@ public class MainActivity extends AppCompatActivity {
             public boolean handleMessage(Message msg) {
                 if (msg.arg1==Constants.ASR_OUTPUT){
                     //================== pipeline =====================
-                    textView.setText((String) msg.obj);
+                    String outStr = (String) msg.obj;
+                    textView.setText(outStr);
+                    try {
+                        FileWriter  f = new FileWriter("/sdcard/log.txt",true);
+                        f.write(outStr+"\n");
+                    } catch (IOException e){
+                        System.out.println("fail to open log file");
+                    }
                     instructText.setText("try next: " + namelist.get(nameIdx));
 
                     //commandListener.StopSearch();
@@ -141,6 +154,12 @@ public class MainActivity extends AppCompatActivity {
                 if(nameIdx<namelist.size()){
                     commandListener.StopSearch();
                     commandListener.SuperSearch("KW1", 20000, String.valueOf(nameIdx)+".raw");
+                    try {
+                        FileWriter  f = new FileWriter("/sdcard/log.txt",true);
+                        f.write("q: "+namelist.get(nameIdx)+"\n");
+                    } catch (IOException e){
+                        System.out.println("fail to open log file");
+                    }
                     nameIdx+=1;
                     textView.setText("Listening...");
 
@@ -182,6 +201,36 @@ public class MainActivity extends AppCompatActivity {
         //if()
         nameIdx = 0;
         instructText.setText(namelist.get(nameIdx));
+
+        //PlayBack();
+    }
+
+    public void PlayBack(){
+        AudioTrack trackplay=new AudioTrack(AudioManager.STREAM_MUSIC, 16000, AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT,1280, AudioTrack.MODE_STREAM);
+        //trackplay.setStereoVolume((float) volume,(float) volume);
+        byte[] buffer = new byte[1280];
+        int byteread;
+        short tmpshort;
+        File historyRaw=new File("/sdcard/yahoo_test/1.raw");
+        //connectAudioToServer();
+
+        try(FileInputStream in = new FileInputStream(historyRaw)){
+            trackplay.play();
+            while((byteread = in.read(buffer))!=-1 ){
+
+                //amplification
+                /*for(int i = 0;i<640;i++){
+                    tmpshort = (short) ((buffer[2*i] << 8) | buffer[2*i+1]);
+                    //tmpshort *= 2;
+                    buffer[2*i]=(byte) (tmpshort >>> 8);
+                    buffer[2*i+1]=(byte) (tmpshort >>> 0);
+                }*/
+
+                trackplay.write(buffer,0,1280);
+            }
+            trackplay.release();
+        }
+        catch (Exception ex){}
     }
 
     @Override
