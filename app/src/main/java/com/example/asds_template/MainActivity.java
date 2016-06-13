@@ -108,6 +108,8 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         FileWriter  f = new FileWriter("/sdcard/log.txt",true);
                         f.write(outStr+"\n");
+                        f.flush();
+                        f.close();
                     } catch (IOException e){
                         System.out.println("fail to open log file");
                     }
@@ -202,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
         nameIdx = 0;
         instructText.setText(namelist.get(nameIdx));
 
-        //PlayBack();
+        PlayBack();
     }
 
     public void PlayBack(){
