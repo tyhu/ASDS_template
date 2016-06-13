@@ -270,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
         emailIdx = -1;
         FileWriter f;
         try {
+            calendar = Calendar.getInstance();
             String audiofn = df1.format(calendar.getTime());
             f = new FileWriter("/sdcard/log.txt",true);
             f.write(audiofn+"\n");
