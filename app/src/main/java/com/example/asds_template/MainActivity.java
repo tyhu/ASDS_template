@@ -32,6 +32,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Random;
+
 import com.example.asds_template.config.Constants;
 import com.example.asds_template.nlu.NLU;
 
@@ -65,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     ArrayList<String> namelist;
     Calendar calendar;
     SimpleDateFormat df1;
+    String trans;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,13 +110,15 @@ public class MainActivity extends AppCompatActivity {
                     textView.setText(outStr);
                     try {
                         FileWriter  f = new FileWriter("/sdcard/log.txt",true);
+                        f.write(trans+"\n");
                         f.write(outStr+"\n");
                         f.flush();
                         f.close();
                     } catch (IOException e){
                         System.out.println("fail to open log file");
                     }
-                    instructText.setText("try next: " + namelist.get(nameIdx));
+                    trans = getTrans(nameIdx);
+                    instructText.setText("try next: " + trans);
 
                     //commandListener.StopSearch();
                     //commandListener.Search("cmd_start", -1);
@@ -202,9 +207,16 @@ public class MainActivity extends AppCompatActivity {
         //gm.updateLabelLstFromGmail();
         //if()
         nameIdx = 0;
-        instructText.setText(namelist.get(nameIdx));
+        trans = getTrans(nameIdx);
+        instructText.setText(trans);
 
-        PlayBack();
+        //PlayBack();
+    }
+
+    public String getTrans(int idx){
+        Random r = new Random();
+        int ri = r.nextInt(templates.size());
+        return templates.get(ri)+" "+namelist.get(idx);
     }
 
     public void PlayBack(){
