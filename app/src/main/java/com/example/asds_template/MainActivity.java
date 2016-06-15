@@ -117,7 +117,10 @@ public class MainActivity extends AppCompatActivity {
                     } catch (IOException e){
                         System.out.println("fail to open log file");
                     }
-                    trans = getTrans(nameIdx);
+                    if(nameIdx<namelist.size())
+                        trans = getTrans(nameIdx);
+                    else
+                        trans = "(the end...)";
                     instructText.setText("try next: " + trans);
 
                     //commandListener.StopSearch();
