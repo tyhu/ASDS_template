@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.asds_template.asr.CommandListener;
@@ -40,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
     Button stopButton;
     Button voiceCMD;
     Button asrButton;
+    ImageView yahooImage;
+
 
     GmailManager gm;
     IMAPManager imap;
@@ -58,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
         asrButton = (Button) findViewById(R.id.bingASRButton);
         //gmailButton = (Button) findViewById(R.id.gmail_button);
         textView = (TextView) findViewById(R.id.textView);
+        yahooImage = (ImageView) findViewById(R.id.imageView);
+        yahooImage.setImageResource(R.mipmap.ymail);
         setTitle("InMind Agent Template");
         //allow main thread execute network operation
         if (android.os.Build.VERSION.SDK_INT > 9) {
