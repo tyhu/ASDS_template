@@ -12,6 +12,7 @@ import android.os.Message;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -28,9 +29,12 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -68,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     Calendar calendar;
     SimpleDateFormat df1;
     String trans;
+    MyHttpConnect conn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,9 +102,9 @@ public class MainActivity extends AppCompatActivity {
         templates.add("The talk is given by ");
 
         //name list:
-        namelist = readNameList();
+        //namelist = readNameList();
         nameIdx = 0;
-        instructText.setText(namelist.get(nameIdx));
+        instructText.setText("Speak a name of LTI student");
 
         commandHandler = new Handler(new Handler.Callback() {
             @Override
@@ -107,21 +112,18 @@ public class MainActivity extends AppCompatActivity {
                 if (msg.arg1==Constants.ASR_OUTPUT){
                     //================== pipeline =====================
                     String outStr = (String) msg.obj;
-                    textView.setText(outStr);
+
+                    textView.setText(postSearch(outStr));
                     try {
                         FileWriter  f = new FileWriter("/sdcard/log.txt",true);
-                        f.write(trans+"\n");
+                        //f.write(trans+"\n");
                         f.write(outStr+"\n");
                         f.flush();
                         f.close();
                     } catch (IOException e){
                         System.out.println("fail to open log file");
                     }
-                    if(nameIdx<namelist.size())
-                        trans = getTrans(nameIdx);
-                    else
-                        trans = "(the end...)";
-                    instructText.setText("try next: " + trans);
+                    //instructText.setText("try next: " + trans);
 
                     //commandListener.StopSearch();
                     //commandListener.Search("cmd_start", -1);
@@ -161,21 +163,10 @@ public class MainActivity extends AppCompatActivity {
                 // Perform action on click
                 //commandListener.Search("cmd_start",-1);
                 //textView.setText("IN MIND AGENT");
-                if(nameIdx<namelist.size()){
-                    commandListener.StopSearch();
-                    commandListener.SuperSearch("KW1", 20000, String.valueOf(nameIdx)+".raw");
-                    try {
-                        FileWriter  f = new FileWriter("/sdcard/log.txt",true);
-                        f.write("q: "+namelist.get(nameIdx)+"\n");
-                    } catch (IOException e){
-                        System.out.println("fail to open log file");
-                    }
-                    nameIdx+=1;
-                    textView.setText("Listening...");
+                commandListener.StopSearch();
+                commandListener.SuperSearch("KW1", 20000, String.valueOf(nameIdx)+".raw");
+                textView.setText("Listening...");
 
-                } else{
-                    instructText.setText("The end");
-                }
             }
         });
 
@@ -202,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
         calendar = Calendar.getInstance();
         df1 = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss a");
         //gm.updateUnReadLstFromGmail();
+        conn = new MyHttpConnect("http://128.2.208.89:9001");
     }
 
     public void startGMail(View view) {
@@ -220,6 +212,34 @@ public class MainActivity extends AppCompatActivity {
         Random r = new Random();
         int ri = r.nextInt(templates.size());
         return templates.get(ri)+" "+namelist.get(idx);
+    }
+
+    public String postSearch(String bingStr){
+        HashMap<String, String> keyValuePairs = new HashMap<String,String>();
+        keyValuePairs.put("BingASR", bingStr);
+        String params = conn.SetParams(keyValuePairs);
+
+        return PostToServer(params);
+    }
+
+    public String PostToServer(String params){
+        String responseStr = "";
+        try{
+            HttpURLConnection response = (HttpURLConnection)conn.PostToServer(params);
+            System.out.println("connection success!");
+            int responseCode = response.getResponseCode();
+            if(responseCode == HttpURLConnection.HTTP_OK){
+                String line;
+                BufferedReader br=new BufferedReader(new InputStreamReader(response.getInputStream()));
+                while ((line=br.readLine()) != null) {
+                    responseStr+=line;
+                }
+
+            }
+        }catch (IOException e){
+            Log.e("Main", "connection error");
+        }
+        return responseStr;
     }
 
     public void PlayBack(){
@@ -289,7 +309,7 @@ public class MainActivity extends AppCompatActivity {
 
         super.onActivityResult(requestCode, resultCode, data);
     }
-    public ArrayList<String> readNameList(){
+    /*public ArrayList<String> readNameList(){
         File namefile = new File("/sdcard/unseen_speaker.txt");
         ArrayList<String> names = new ArrayList<String>();
         try {
@@ -306,5 +326,5 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("can not open unseen_speaker.txt");
         }
         return names;
-    }
+    }*/
 }
