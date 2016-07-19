@@ -61,7 +61,8 @@ public class MainActivity extends AppCompatActivity {
     DialogOne dm;
 
     //for experiment
-    int nexttag = 0;
+    int stateint = 0; //0: next 1: say again 2: first name 3: last name
+    boolean b;
     int nameIdx = -1;
     ArrayList<String> templates;
     ArrayList<String> namelist;
@@ -99,6 +100,7 @@ public class MainActivity extends AppCompatActivity {
         //name list:
         namelist = readNameList();
         nameIdx = 0;
+        b = false;
         instructText.setText(namelist.get(nameIdx));
 
         commandHandler = new Handler(new Handler.Callback() {
@@ -117,11 +119,34 @@ public class MainActivity extends AppCompatActivity {
                     } catch (IOException e){
                         System.out.println("fail to open log file");
                     }
-                    if(nameIdx<namelist.size())
+                    if(stateint==0){
                         trans = getTrans(nameIdx);
-                    else
-                        trans = "(the end...)";
-                    instructText.setText("try next: " + trans);
+                        instructText.setText("Sorry, please say it again. (" + trans+")");
+                        stateint = 1;
+
+                    }
+                    else if (stateint==1) {
+                        trans = getTrans(nameIdx);
+                        instructText.setText("what's the first name?: (" + trans+")");
+                        stateint = 2;
+                    }
+                    else if (stateint==2) {
+                        trans = getTrans(nameIdx);
+                        instructText.setText("what's the last name?: (" + trans+")");
+                        stateint = 3;
+                    }
+                    else if (stateint==3) {
+                        nameIdx+=1;
+                        trans = getTrans(nameIdx);
+                        instructText.setText("try next: " + trans);
+                        stateint = 0;
+                    }
+
+                    //if(nameIdx<namelist.size())
+                    //    trans = getTrans(nameIdx);
+                    //else
+                    //    trans = "(the end...)";
+                    //instructText.setText("try next: " + trans);
 
                     //commandListener.StopSearch();
                     //commandListener.Search("cmd_start", -1);
@@ -170,7 +195,6 @@ public class MainActivity extends AppCompatActivity {
                     } catch (IOException e){
                         System.out.println("fail to open log file");
                     }
-                    nameIdx+=1;
                     textView.setText("Listening...");
 
                 } else{
@@ -210,6 +234,7 @@ public class MainActivity extends AppCompatActivity {
         //gm.updateLabelLstFromGmail();
         //if()
         nameIdx = 0;
+        b = !b;
         trans = getTrans(nameIdx);
         instructText.setText(trans);
 
@@ -217,9 +242,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String getTrans(int idx){
-        Random r = new Random();
-        int ri = r.nextInt(templates.size());
-        return templates.get(ri)+" "+namelist.get(idx);
+        //Random r = new Random();
+        //int ri = r.nextInt(templates.size());
+        //return templates.get(ri)+" "+namelist.get(idx);
+        return namelist.get(idx);
     }
 
     public void PlayBack(){
@@ -290,7 +316,8 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
     public ArrayList<String> readNameList(){
-        File namefile = new File("/sdcard/unseen_speaker.txt");
+        //File namefile = new File("/sdcard/unseen_speaker.txt");
+        File namefile = new File("/sdcard/student.txt");
         ArrayList<String> names = new ArrayList<String>();
         try {
             BufferedReader br = new BufferedReader(new FileReader(namefile));
