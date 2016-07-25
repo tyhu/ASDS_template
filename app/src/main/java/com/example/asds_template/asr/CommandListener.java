@@ -193,14 +193,14 @@ public class CommandListener implements RecognitionListener  {
                 recognizer.stop();
                 commandHandler.sendMessage(msg);
             }
-            else if (cmd.endsWith("next email")||cmd.endsWith("check in box")||cmd.endsWith("repeat that")){
+            /*else if (cmd.endsWith("next email")||cmd.endsWith("check in box")||cmd.endsWith("repeat that")){
                 Message msg = new Message();
                 msg.arg1 = Constants.ASR_OUTPUT;
                 msg.obj = cmd;
                 commandHandler.sendMessage(msg);
                 useBing = false;
                 recognizer.stop();
-            }
+            }*/
             else if (cmd.endsWith("terminate")){
                 System.out.println("we have time out");
                 Message msg = new Message();
