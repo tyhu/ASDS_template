@@ -116,14 +116,14 @@ public class MainActivity extends AppCompatActivity {
                         f.write(outStr+"\n");
                         f.flush();
                         f.close();
-                    } catch (IOException e){
+                    } catch (IOException e) {
                         System.out.println("fail to open log file");
                     }
+
                     if(stateint==0){
                         trans = getTrans(nameIdx);
                         instructText.setText("Sorry, please say it again. (" + trans+")");
-                        stateint = 1;
-
+                        stateint = 4;
                     }
                     else if (stateint==1) {
                         trans = getTrans(nameIdx);
@@ -140,6 +140,12 @@ public class MainActivity extends AppCompatActivity {
                         trans = getTrans(nameIdx);
                         instructText.setText("try next: " + trans);
                         stateint = 0;
+                    }
+                    else if (stateint==4) {
+                        nameIdx+=1;
+                        trans = getTrans(nameIdx);
+                        instructText.setText("try next: " + trans);
+                        stateint = 1;
                     }
 
                     //if(nameIdx<namelist.size())
@@ -228,13 +234,17 @@ public class MainActivity extends AppCompatActivity {
         //gm.updateUnReadLstFromGmail();
     }
 
+    //reset
     public void startGMail(View view) {
         //Intent intent = new Intent(this, GmailActivity.class);
         //startActivity(intent);
         //gm.updateLabelLstFromGmail();
         //if()
         nameIdx = 0;
-        b = !b;
+        if (stateint==1)
+            stateint = 0;
+        else
+            stateint = 1;   
         trans = getTrans(nameIdx);
         instructText.setText(trans);
 
