@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     NLU nlu;
     NLG nlg;
     DialogTwo dm;
+    boolean asrTest;
 
     SharedPreferences  inmindSharedPreferences ;
 
@@ -70,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
             StrictMode.setThreadPolicy(policy);
         }
 
+        asrTest = false;
         commandHandler = new Handler(new Handler.Callback() {
             @Override
             public boolean handleMessage(Message msg) {
@@ -101,6 +103,11 @@ public class MainActivity extends AppCompatActivity {
                     //nlg
                 }
                 else if (msg.arg1==Constants.ASR_OUTPUT){
+                    if (asrTest){
+                        textView.setText("ASR test result: "+msg.obj);
+                        asrTest = false;
+                        return false;
+                    }
                     //================== pipeline =====================
                     textView.setText((String) msg.obj);
                     NLU.NLUState nluState = nlu.understanding((String)msg.obj);
@@ -147,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Perform action on click
                 //commandListener.Search("cmd_start",-1);
+                asrTest = false;
                 textView.setText("IN MIND AGENT");
                 commandListener.Search("cmd_start", 4000);
                 //commandListener.SuperSearch("cmd1", 4000);
@@ -165,14 +173,9 @@ public class MainActivity extends AppCompatActivity {
 
         asrButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                commandListener.Search("cmd_start", 20000);
-                textView.setText("IN MIND AGENT");
-                //commandListener.StopSearch();
-                //try{
-                //String asrOutput = bingRecognizer.BingSuperRecognition();
-                //textView.setText("output from bingASR: \n"+asrOutput);
-                //}catch(IOException e){
-                //    Log.e("ASDS", e.getMessage());}
+                commandListener.SuperSearch("KW1", 5000);
+                textView.setText("Listening...");
+                asrTest = true;
             }
         });
 
