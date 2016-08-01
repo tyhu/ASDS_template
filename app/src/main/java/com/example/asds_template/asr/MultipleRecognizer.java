@@ -59,8 +59,10 @@ public class MultipleRecognizer {
     private int queueSize = 100;
     Queue<float[]> MFCCQueue = new ConcurrentLinkedQueue<float[]>();
 
-    private String client_id = "dmeexdia";
-    private String client_secret = "wNUXY7NvpIw1ugB4zVcUPhVQS6Lv9MFNPWa6qWIkIFY=";
+    //private String client_id = "dmeexdia";
+    //private String client_secret = "wNUXY7NvpIw1ugB4zVcUPhVQS6Lv9MFNPWa6qWIkIFY=";
+    private String client_id = "studycmu";
+    private String client_secret = "Wv2kLknxRDRorXP5KfvCRcVSHvc1gavvMVdpBfJcpqQ";
     private String link = "https://speech.platform.bing.com/recognize/?";
     private URL url;
     private byte[] wav_header;
