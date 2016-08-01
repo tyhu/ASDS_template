@@ -1,4 +1,4 @@
-package com.example.asds_template;
+package com.example.asds_template.util;
 
 import java.io.IOException;
 import java.util.ArrayList;

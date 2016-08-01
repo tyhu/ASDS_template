@@ -1,15 +1,13 @@
 package com.example.asds_template.dm;
 
-import com.example.asds_template.IMAPManager;
+import com.example.asds_template.util.IMAPManager;
 import com.example.asds_template.nlg.NLG;
 import com.example.asds_template.nlu.NLU;
 
 import java.util.List;
 
-import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Message;
-import javax.mail.Multipart;
 
 /**
  * Created by TingYao on 4/16/2016.

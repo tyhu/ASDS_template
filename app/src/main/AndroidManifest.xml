@@ -28,9 +28,9 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <activity android:name=".GmailActivity" />
+        <activity android:name=".util.GmailActivity" />
         <activity
-            android:name=".ImapLoginActivity"
+            android:name=".util.ImapLoginActivity"
             android:label="@string/title_activity_imap_login"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>

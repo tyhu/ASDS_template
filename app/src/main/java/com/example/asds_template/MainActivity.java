@@ -16,18 +16,17 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.asds_template.asr.CommandListener;
-import com.example.asds_template.dm.DialogOne;
 import com.example.asds_template.dm.DialogTwo;
 import com.example.asds_template.nlg.NLG;
 
 import java.util.ArrayList;
 import java.util.List;
 import com.example.asds_template.config.Constants;
+import com.example.asds_template.nlu.MovieNLU;
 import com.example.asds_template.nlu.NLU;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.example.asds_template.util.GmailManager;
+import com.example.asds_template.util.IMAPManager;
+import com.example.asds_template.util.ImapLoginActivity;
 
 public class MainActivity extends AppCompatActivity {
 //public class MainActivity extends AppCompatActivity {
@@ -176,6 +175,9 @@ public class MainActivity extends AppCompatActivity {
                 commandListener.SuperSearch("KW1", 5000);
                 textView.setText("Listening...");
                 asrTest = true;
+
+                //MovieNLU mnlu = new MovieNLU("tts.speech.cs.cmu.edu",9001);
+                //mnlu.understand("tell me something");
             }
         });
 

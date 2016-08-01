@@ -1,4 +1,4 @@
-package com.example.asds_template;
+package com.example.asds_template.util;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.example.asds_template.R;
 import com.example.asds_template.config.Constants;
 
 public class ImapLoginActivity extends AppCompatActivity {

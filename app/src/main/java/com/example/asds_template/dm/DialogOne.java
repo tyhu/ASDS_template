@@ -1,11 +1,10 @@
 package com.example.asds_template.dm;
 
-import com.example.asds_template.GmailManager;
+import com.example.asds_template.util.GmailManager;
 import com.example.asds_template.nlg.NLG;
 import com.example.asds_template.nlu.NLU;
 import com.google.api.services.gmail.model.Message;
 
-import java.io.IOException;
 import java.util.List;
 
 /**

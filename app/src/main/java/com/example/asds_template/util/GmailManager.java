@@ -1,4 +1,4 @@
-package com.example.asds_template;
+package com.example.asds_template.util;
 
 import android.accounts.AccountManager;
 import android.app.Activity;
