@@ -21,7 +21,9 @@ public class DialogMovie {
     ArrayList<String> entities;
     int rcount;
     public DialogMovie(){
-        startOver();
+        rcount = 0;
+        entities = new ArrayList<String>();
+        entities.clear();
     }
 
     public HashMap takePolicy(JSONObject nluOut) throws JSONException {
@@ -46,6 +48,12 @@ public class DialogMovie {
             action = "request_profile";
         else{
             action = "recommand_movies";
+            String lastEntity = entities.get(entities.size()-1);
+            if(lastEntity.contains("tom cruise"))
+                movie = "Mission Impossible";
+            else if(lastEntity.contains("melissa mccarthy"))
+                movie = "Ghost Buster";
+
             hashMap.put("movie",movie);
             rcount+=1;
         }
@@ -56,7 +64,6 @@ public class DialogMovie {
 
     public void startOver(){
         rcount = 0;
-        entities = new ArrayList<String>();
         entities.clear();
     }
 }

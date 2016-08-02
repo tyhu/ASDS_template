@@ -150,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 asrTest = false;
                 textView.setText("IN MIND AGENT");
                 commandListener.Search("cmd_start",8000);
+                dm.startOver();
                 //commandListener.SuperSearch("KW1", 10000);
             }
         });
