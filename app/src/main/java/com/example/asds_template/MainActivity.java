@@ -28,6 +28,9 @@ import com.example.asds_template.util.GmailManager;
 import com.example.asds_template.util.IMAPManager;
 import com.example.asds_template.util.ImapLoginActivity;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class MainActivity extends AppCompatActivity {
 //public class MainActivity extends AppCompatActivity {
 
@@ -45,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
 
     GmailManager gm;
     IMAPManager imap;
-    NLU nlu;
+    MovieNLU nlu;
     NLG nlg;
     DialogTwo dm;
     boolean asrTest;
@@ -92,11 +95,10 @@ public class MainActivity extends AppCompatActivity {
                 else if (msg.arg1==-1){
 
                     //String asrOutput = (String)msg.obj;
-                    NLU.NLUState nluState = nlu.understanding((String)msg.obj);
-                    dm.inputNLUState(nluState);
+
 
                     commandListener.StopSearch();
-                    commandListener.Search("cmd_start", -1);
+                    commandListener.Search("KW1", -1);
                     //nlg.speakRaw("you have no unread email");
                     //DM
                     //nlg
@@ -108,13 +110,16 @@ public class MainActivity extends AppCompatActivity {
                         return false;
                     }
                     //================== pipeline =====================
-                    textView.setText((String) msg.obj);
-                    NLU.NLUState nluState = nlu.understanding((String)msg.obj);
-                    dm.inputNLUState(nluState);
+                    String asrout = (String) msg.obj;
+                    textView.setText("ASR: " + asrout);
+                    //String nluout = nlu.understand(asrout);
+                    try {
+                        JSONObject jsonObj = nlu.understand((String) msg.obj);
+                        textView.setText("ASR: " + asrout + "\n" + "NLU: "+jsonObj.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
 
-                    //commandListener.StopSearch();
-                    //commandListener.Search("cmd_start", -1);
-                    //nlg.speakRaw("you have no unread email");
 
                 }
                 else if (msg.arg1==Constants.TTS_COMPLETE){
@@ -138,27 +143,15 @@ public class MainActivity extends AppCompatActivity {
         //bingRecognizer = new BingRecognizer("dmeexdia","wNUXY7NvpIw1ugB4zVcUPhVQS6Lv9MFNPWa6qWIkIFY=");
         commandListener = new CommandListener(context, commandHandler);
         SharedPreferences settings = getPreferences(Context.MODE_PRIVATE);
-        //gm = new GmailManager(this.context,settings,this);
-        List<String> dialogIntent = new ArrayList<String>();
-        dialogIntent.add("read");
-        dialogIntent.add("summarize");
-        dialogIntent.add("check");
-        dialogIntent.add("repeat");
-        dialogIntent.add("spell");
-        dialogIntent.add("search");
-        nlu = new NLU(dialogIntent);
+
+        nlu = new MovieNLU("tts.speech.cs.cmu.edu",9001);
         nlg = new NLG(context,commandHandler);
 
         voiceCMD.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                // Perform action on click
-                //commandListener.Search("cmd_start",-1);
                 asrTest = false;
-                textView.setText("IN MIND AGENT");
-                commandListener.Search("cmd_start", 4000);
-                //commandListener.SuperSearch("cmd1", 4000);
-                //textView.setText("Listening...");
-                //commandListener.Search("cmd_start", -1);
+                textView.setText("Listening...");
+                commandListener.SuperSearch("KW1", 10000);
             }
         });
 
@@ -194,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
         initialImap();
         //=====end of imap log in
 
-        dm = new DialogTwo(imap,nlg,dialogIntent);
+        //dm = new DialogTwo(imap,nlg,dialogIntent);
     }
 
     public void initialImap(){

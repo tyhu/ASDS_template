@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.example.asds_template.util.MyHttpConnect;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -25,7 +26,7 @@ public class MovieNLU {
         conn = new MyHttpConnect("http://"+url+":"+String.valueOf(port));
     }
 
-    public void understand(String sent){
+    public JSONObject understand(String sent) throws JSONException {
         HashMap<String, String> keyValuePairs = new HashMap<String,String>();
         keyValuePairs.put("utt", sent);
         String params = conn.SetParams(keyValuePairs);
@@ -47,6 +48,9 @@ public class MovieNLU {
         }
 
         System.out.println("nlu output: "+rstr);
+        JSONObject jsonObj = new JSONObject(rstr);
+        return jsonObj;
+
 
     }
 
