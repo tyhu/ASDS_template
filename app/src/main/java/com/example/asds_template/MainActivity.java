@@ -1,6 +1,5 @@
 package com.example.asds_template;
 
-import android.accounts.AccountManager;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -16,15 +15,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.asds_template.asr.CommandListener;
-import com.example.asds_template.dm.DialogTwo;
+import com.example.asds_template.dm.DialogMovie;
 import com.example.asds_template.nlg.NLG;
 
-import java.util.ArrayList;
-import java.util.List;
 import com.example.asds_template.config.Constants;
 import com.example.asds_template.nlu.MovieNLU;
-import com.example.asds_template.nlu.NLU;
-import com.example.asds_template.util.GmailManager;
 import com.example.asds_template.util.IMAPManager;
 import com.example.asds_template.util.ImapLoginActivity;
 
@@ -46,11 +41,10 @@ public class MainActivity extends AppCompatActivity {
     ImageView yahooImage;
 
 
-    GmailManager gm;
     IMAPManager imap;
     MovieNLU nlu;
     NLG nlg;
-    DialogTwo dm;
+    DialogMovie dm;
     boolean asrTest;
 
     SharedPreferences  inmindSharedPreferences ;
@@ -115,9 +109,12 @@ public class MainActivity extends AppCompatActivity {
                     //String nluout = nlu.understand(asrout);
                     try {
                         JSONObject jsonObj = nlu.understand((String) msg.obj);
-                        textView.setText("ASR: " + asrout + "\n" + "NLU: "+jsonObj.toString());
+                        nlg.inputMap(dm.takePolicy(jsonObj));
+                        //textView.setText("ASR: " + asrout + "\n" + "NLU: " + jsonObj.toString());
+
                     } catch (JSONException e) {
                         e.printStackTrace();
+                        nlg.speakRaw("catch an exception");
                     }
 
 
@@ -146,12 +143,14 @@ public class MainActivity extends AppCompatActivity {
 
         nlu = new MovieNLU("tts.speech.cs.cmu.edu",9001);
         nlg = new NLG(context,commandHandler);
+        dm = new DialogMovie();
 
         voiceCMD.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 asrTest = false;
-                textView.setText("Listening...");
-                commandListener.SuperSearch("KW1", 10000);
+                textView.setText("IN MIND AGENT");
+                commandListener.Search("cmd_start",8000);
+                //commandListener.SuperSearch("KW1", 10000);
             }
         });
 
@@ -165,12 +164,24 @@ public class MainActivity extends AppCompatActivity {
 
         asrButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                commandListener.SuperSearch("KW1", 5000);
-                textView.setText("Listening...");
-                asrTest = true;
+                //commandListener.SuperSearch("KW1", 5000);
+                //textView.setText("Listening...");
+                //asrTest = true;
 
+                //nlu test
                 //MovieNLU mnlu = new MovieNLU("tts.speech.cs.cmu.edu",9001);
                 //mnlu.understand("tell me something");
+
+                //dm test
+                JSONObject jsonObj = null;
+                try {
+                    jsonObj = new JSONObject("{\"entities\": [[\"actor\", \"tom cruise\", 5, 2]], \"label\": \"inform_preference\"}");
+                    dm.takePolicy(jsonObj);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+
             }
         });
 
@@ -210,59 +221,6 @@ public class MainActivity extends AppCompatActivity {
         imap.markAllRead();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode) {
-            case Constants.REQUEST_GOOGLE_PLAY_SERVICES:
-                if (resultCode != RESULT_OK) {
-                    gm.isGooglePlayServicesAvailable();
-                }
-                break;
-            case Constants.REQUEST_ACCOUNT_PICKER:
-                if (resultCode == RESULT_OK && data != null &&
-                        data.getExtras() != null) {
-                    String accountName =
-                            data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-                    if (accountName != null) {
-                        System.out.println("catch the name");
-                        gm.setSelectedAccountName(accountName);
-                        /*
-                        mCredential.setSelectedAccountName(accountName);
-                        SharedPreferences settings =
-                                getPreferences(Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putString(PREF_ACCOUNT_NAME, accountName);
-                        editor.apply();*/
 
-                    }
-                } else if (resultCode == RESULT_CANCELED) {
-                    System.out.println("Account unspecified.");
-                }
-                break;
-            case Constants.REQUEST_AUTHORIZATION:
-                if (resultCode != RESULT_OK) {
-                    gm.chooseAccount();
-                }
-                break;
-            case Constants.RECEIVE_IMAP_LOGIN:
-                if (resultCode == RESULT_OK && data != null &&
-                        data.getExtras() != null) {
-                    SharedPreferences.Editor editor = inmindSharedPreferences.edit();
-                    editor.putBoolean(Constants.LOGINED_FLAG, true);
-                    editor.putString(Constants.USERNAME_FLAG, data.getStringExtra(Constants.USERNAME_FLAG));
-                    editor.putString(Constants.PWD_FLAG,data.getStringExtra(Constants.PWD_FLAG));
-                    editor.putString(Constants.HOST_FLAG,data.getStringExtra(Constants.HOST_FLAG));
-                    editor.apply();
-
-                    //initialize
-                    initialImap();
-                    dm.setImap(imap);
-                }
-
-        }
-
-        super.onActivityResult(requestCode, resultCode, data);
-    }
 
 }

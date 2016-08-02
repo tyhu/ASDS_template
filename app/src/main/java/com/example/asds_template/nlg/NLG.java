@@ -8,6 +8,8 @@ import android.content.Context;
 import android.os.Handler;
 import android.speech.tts.UtteranceProgressListener;
 
+import java.util.HashMap;
+
 public class NLG{
     TTSController tts;
     public NLG(Context context, Handler handler){
@@ -15,33 +17,14 @@ public class NLG{
     }
     public void speakRaw(String msg){ tts.speakThis(msg); }
 
-    public void InformEmail(String sender,String content){
-        String output = sender+" said, "+content;
-        tts.speakThis(output);
-    }
-
-    public void InformFound(int num){
-        if(num==0)
-            tts.speakThis("no unread email found");
-        else{
-            String numStr = String.valueOf(num);
-            String output = numStr+" unread emails found";
-            tts.speakThis(output);
+    public void inputMap(HashMap<String,String> hashmap){
+        String action = hashmap.get("action");
+        if(action=="request_profile")
+            speakRaw("Ok, tell me what you like");
+        else if(action=="recommand_movies"){
+            String movie = hashmap.get("movie");
+            speakRaw("I think you might like "+movie);
         }
-
-    }
-
-    public void InformUnread(int num){
-        if(num==-1)
-            tts.speakThis("Connection Error, please check your internet");
-        else if(num==0)
-            tts.speakThis("You have no unread email");
-        else if(num<6){
-            String numStr = String.valueOf(num);
-            tts.speakThis("You have "+numStr+", unread email");
-        }
-        else
-            tts.speakThis("You have more than 5 unread email");
     }
 
 }
