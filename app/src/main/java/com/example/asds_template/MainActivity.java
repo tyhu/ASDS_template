@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
 
         nlu = new MovieNLU("tts.speech.cs.cmu.edu",9001);
         nlg = new NLG(context,commandHandler);
-        dm = new DialogMovie();
+        dm = new DialogMovie(context);
 
         voiceCMD.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
