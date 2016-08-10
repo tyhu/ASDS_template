@@ -17,20 +17,21 @@ public class NLG{
     }
     public void speakRaw(String msg){ tts.speakThis(msg); }
 
-    public void inputMap(HashMap<String,String> hashmap){
+    public String inputMap(HashMap<String,String> hashmap){
         String action = hashmap.get("action");
-        if(action=="request_profile")
-            speakRaw("Ok, tell me what you like");
+        String rawout = "";
+        if(action=="request_profile"){
+            rawout = "Ok, tell me what you like";
+        }
         else if(action=="recommand_movies"){
             String moviesStr = hashmap.get("movie_str");
             String entity = hashmap.get("reason_entity");
             String type = hashmap.get("reason_type");
             String movie_num = hashmap.get("movie_num");
 
-            String rawout = "";
+
             rawout+=explainStr(entity,type,movie_num);
             rawout+=" "+moviesStr;
-            speakRaw(rawout);
 
         }
         else if (action=="infer+recommand_movie"){
@@ -41,14 +42,14 @@ public class NLG{
             String sourceMovieStr = hashmap.get("source_movies");
             String sourceNum = hashmap.get("source_num");
 
-            String rawout = "";
-            rawout+=inferredExplain(entity,type,sourceNum,sourceMovieStr);
+            rawout+=inferredExplain(entity, type, sourceNum, sourceMovieStr);
             rawout+=furtherRecommend(moviesStr,movie_num);
-            speakRaw(rawout);
         }
         else if (action=="end"){
-            speakRaw("That's good. enjoy!");
+            rawout = "That's good. enjoy!";
         }
+        speakRaw(rawout);
+        return rawout;
     }
     private String explainStr(String entity,String type, String movie_num){
         String out = "";
@@ -72,6 +73,7 @@ public class NLG{
 
     private String inferredExplain(String entity,String type, String movie_num, String movieStr){
         String out = "";
+        System.out.println("movie_num: "+movie_num);
         if (type.equals("genre"))
             if (movie_num.equals("1"))
                 out+=movieStr+" is a good "+entity+" movie, ";

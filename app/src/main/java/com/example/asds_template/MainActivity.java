@@ -9,6 +9,7 @@ import android.os.Message;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -22,9 +23,12 @@ import com.example.asds_template.config.Constants;
 import com.example.asds_template.nlu.MovieNLU;
 import com.example.asds_template.util.IMAPManager;
 import com.example.asds_template.util.ImapLoginActivity;
+import com.example.asds_template.util.SocketCaller;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 //public class MainActivity extends AppCompatActivity {
@@ -46,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     NLG nlg;
     DialogMovie dm;
     boolean asrTest;
+    SocketCaller socketCaller;
 
     SharedPreferences  inmindSharedPreferences ;
 
@@ -109,18 +114,28 @@ public class MainActivity extends AppCompatActivity {
                     //String nluout = nlu.understand(asrout);
                     try {
                         JSONObject jsonObj = nlu.understand((String) msg.obj);
-                        nlg.inputMap(dm.takePolicy(jsonObj));
+                        String nlgout = nlg.inputMap(dm.takePolicy(jsonObj));
                         //textView.setText("ASR: " + asrout + "\n" + "NLU: " + jsonObj.toString());
 
+                        //extract dialogue state (user profile)
+
+                        socketCaller.sendRecord(asrout);
+                        socketCaller.sendRecord(jsonObj.toString());
+                        socketCaller.sendRecord(nlgout);
+
+                        ArrayList<String> userProfileEntity = dm.getUserProfileEntity();
+                        ArrayList<String> userProfileMovie = dm.getUserProfileMovies();
+                        socketCaller.sendRecord(TextUtils.join(",",userProfileEntity)+"|"+TextUtils.join(",",userProfileMovie));
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        nlg.speakRaw("catch an exception");
+                        //nlg.speakRaw("catch an exception");
+                        nlg.speakRaw("Excuse me, could you say it again?");
                     }
 
 
                 }
                 else if (msg.arg1==Constants.TTS_COMPLETE){
-                    commandListener.SuperSearch("KW1", 5000);
+                    commandListener.SuperSearch("KW1", 10000);
                     textView.setText("Listening...");
                     /*
                     System.out.println("tts: "+(String)msg.obj);
@@ -144,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
         nlu = new MovieNLU("tts.speech.cs.cmu.edu",9001);
         nlg = new NLG(context,commandHandler);
         dm = new DialogMovie(context);
+        socketCaller = new SocketCaller("128.237.224.117",2346);
 
         voiceCMD.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -159,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 commandListener.StopSearch();
                 textView.setText("STOP");
-                imap.closeInbox();
+                //imap.closeInbox();
             }
         });
 
@@ -187,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //=====imap log in
-        inmindSharedPreferences = getSharedPreferences(Constants.PREFERENCE_NAME, Activity.MODE_PRIVATE);
+        /*inmindSharedPreferences = getSharedPreferences(Constants.PREFERENCE_NAME, Activity.MODE_PRIVATE);
 
         //startActivity(imapLogin);
         if(!inmindSharedPreferences.contains(Constants.LOGINED_FLAG)) {
@@ -196,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
         }
         else
             System.out.println("Hey! login info existed!!!!");
-        initialImap();
+        initialImap();*/
         //=====end of imap log in
 
         //dm = new DialogTwo(imap,nlg,dialogIntent);

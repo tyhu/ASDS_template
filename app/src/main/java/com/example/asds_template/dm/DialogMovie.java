@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.example.asds_template.util.MyHttpConnect;
+import com.example.asds_template.util.SocketCaller;
 import com.google.api.client.json.Json;
 
 import org.json.JSONArray;
@@ -73,6 +74,7 @@ public class DialogMovie {
         readMovieDict();
 
 
+
     }
 
     public HashMap takePolicy(JSONObject nluOut) throws JSONException {
@@ -88,12 +90,18 @@ public class DialogMovie {
             //movie backend here
             String type = ((JSONArray) inputEntities.get(i)).getString(0);
             String entity =((JSONArray) inputEntities.get(i)).getString(1);
+            int sent = ((JSONArray) inputEntities.get(i)).getInt(4);
             if (!curr_entities.contains(entity)){
-                if (type.equals("movie"))
-                    curr_movies.add(entity);
+                if (type.equals("movie")) {
+                    if(sent==1){
+                        curr_movies.add(entity);
+                        user_movies.add(entity);
+                    }
+                }
                 else{
                     curr_entities.add(entity);
                     curr_types.add(type);
+                    user_entities.add(entity);
                 }
 
             }
@@ -126,7 +134,8 @@ public class DialogMovie {
                 //real
                 ArrayList<String> inferredEntities = inferEntityFromSingleMovie(curr_movies.get(0));
 
-                System.out.println("infer results: "+curr_movies+inferredEntities);
+                System.out.println("infer results: " + curr_movies + inferredEntities);
+                user_entities.addAll(inferredEntities);
                 //fake
                 //systemMovies = fakeBackendRetrieveMovie(inferredEntities);
 
@@ -134,11 +143,11 @@ public class DialogMovie {
                 systemMovies = backendRetrieveMovie(inferredEntities,3);
                 //remove the first
                 systemMovies.remove(0);
-                systemMovies.remove(1);
+                systemMovies.remove(0);
 
                 action = "infer+recommand_movie";
                 hashMap.put("source_movies",movieList2Str(curr_movies));
-                hashMap.put("source_num",String.valueOf(curr_movies));
+                hashMap.put("source_num",String.valueOf(curr_movies.size()));
                 hashMap.put("reason_entity", inferredEntities.get(0));
                 hashMap.put("reason_type","actor");
             }
@@ -148,7 +157,6 @@ public class DialogMovie {
         else if (intent.equals("decide")){
             action = "end";
         }
-
 
         hashMap.put("action", action);
         return hashMap;
@@ -235,7 +243,7 @@ public class DialogMovie {
     private ArrayList<String> inferEntityFromSingleMovie(String movieStr) throws JSONException{
 
         int movieIdx = Integer.parseInt(movieIdxMap.get(movieStr));
-        System.out.println("input: "+movieIdx);
+        System.out.println("input: " + movieIdx);
         ArrayList<String> dummy = new ArrayList<String>();
         int[] targetList = new int[1];
         //temporarily, select the first one,
@@ -328,5 +336,16 @@ public class DialogMovie {
         }
         System.out.println("size: "+movieIdxMap.size());
 
+    }
+
+    public ArrayList<String> getUserProfileEntity(){
+        return user_entities;
+    }
+
+    public ArrayList<String> getUserProfileMovies(){
+        ArrayList<String> allMovies = new ArrayList<String>();
+        allMovies.addAll(user_movies);
+        allMovies.addAll(systemMovies);
+        return allMovies;
     }
 }
