@@ -151,7 +151,7 @@ public class DialogMovie {
                 hashMap.put("reason_entity", inferredEntities.get(0));
                 hashMap.put("reason_type","actor");
             }
-            hashMap.put("movie_num",String.valueOf(systemMovies.size()));
+            hashMap.put("movie_num", String.valueOf(systemMovies.size()));
             hashMap.put("movie_str",movieList2Str(systemMovies));
         }
         else if (intent.equals("decide")){
@@ -293,11 +293,11 @@ public class DialogMovie {
     private String movieList2Str(List<String> movieList){
         String movieStr = movieList.get(0);
         if (movieList.size()==1)
-            return movieStr;
+            return postProcess(movieStr);
         else{
             for(int i=1;i<movieList.size()-1;i++)
-                movieStr+=", "+movieList.get(i);
-            movieStr+=" and "+movieList.get(movieList.size()-1);
+                movieStr+=", "+postProcess(movieList.get(i));
+            movieStr+=" and "+postProcess(movieList.get(movieList.size()-1));
             return movieStr;
         }
     }
@@ -347,5 +347,16 @@ public class DialogMovie {
         allMovies.addAll(user_movies);
         allMovies.addAll(systemMovies);
         return allMovies;
+    }
+
+    private String postProcess(String entity){
+        if (entity.equals("sci-fi")){
+            return "science-fiction";
+        }
+        else if(entity.contains(",")){
+            return entity.split(",")[0];
+        }
+        else
+            return entity;
     }
 }

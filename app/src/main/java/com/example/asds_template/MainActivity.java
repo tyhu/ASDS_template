@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     DialogMovie dm;
     boolean asrTest;
     SocketCaller socketCaller;
+    SocketCaller MVCaller;
 
     SharedPreferences  inmindSharedPreferences ;
 
@@ -119,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
 
                         //extract dialogue state (user profile)
 
-                        socketCaller.sendRecord(asrout);
                         socketCaller.sendRecord(jsonObj.toString());
                         socketCaller.sendRecord(nlgout);
 
@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
                 }
                 else if (msg.arg1==Constants.TTS_COMPLETE){
-                    commandListener.SuperSearch("KW1", 10000);
+                    commandListener.SuperSearch("KW1", 14000);
                     textView.setText("Listening...");
                     /*
                     System.out.println("tts: "+(String)msg.obj);
@@ -160,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
         nlg = new NLG(context,commandHandler);
         dm = new DialogMovie(context);
         socketCaller = new SocketCaller("128.237.224.117",2346);
+        //socketCaller = new SocketCaller("192.168.0.5",2346);
 
         voiceCMD.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {

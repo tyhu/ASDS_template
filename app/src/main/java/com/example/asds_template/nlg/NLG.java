@@ -53,21 +53,22 @@ public class NLG{
     }
     private String explainStr(String entity,String type, String movie_num){
         String out = "";
+        String entity2 = postProcess(entity);
         if (type.equals("genre"))
             if (movie_num.equals("1"))
-                out+="Here is a "+entity+" movie you might like, ";
+                out+="Here is a "+entity2+" movie you might like, ";
             else
-                out+="Here are "+movie_num+" "+entity+" movies you might like, ";
+                out+="Here are "+movie_num+" "+entity2+" movies you might like, ";
         else if (type.equals("actor"))
             if (movie_num.equals("1"))
-                out+="Here is a movie with "+entity+" that you might like, ";
+                out+="Here is a movie with "+entity2+" that you might like, ";
             else
-                out+="Here are "+movie_num+" movies with "+entity+" that you might like, ";
+                out+="Here are "+movie_num+" movies with "+entity2+" that you might like, ";
         else if (type.equals("director"))
             if (movie_num.equals("1"))
-                out+="Here is a movie directed by "+entity+", ";
+                out+="Here is a movie directed by "+entity2+", ";
             else
-                out+="Here are "+movie_num+" movies directed by "+entity+", ";
+                out+="Here are "+movie_num+" movies directed by "+entity2+", ";
         return out;
     }
 
@@ -99,5 +100,16 @@ public class NLG{
             out+="Here are another "+movie_num+", ";
         out+=moviesStr;
         return out;
+    }
+
+    private String postProcess(String entity){
+        if (entity.equals("sci-fi")){
+            return "science-fiction";
+        }
+        else if(entity.contains(", the")){
+            return entity.split(" ")[0];
+        }
+        else
+            return entity;
     }
 }
